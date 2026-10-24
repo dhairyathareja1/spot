@@ -403,6 +403,10 @@ h2 {
   border-radius: 9px;
 }
 
+.editor-loading {
+  min-height: 270px;
+}
+
 .proof-editor .cm-editor {
   min-height: 270px;
   color: #e5e7eb;
@@ -596,6 +600,15 @@ h2 {
   font-size: 32px;
   font-weight: 850;
   letter-spacing: 0.12em;
+}
+
+.qed-stars {
+  display: inline-block;
+  margin-left: 12px;
+  color: #facc15;
+  font-size: 20px;
+  letter-spacing: 0.04em;
+  vertical-align: 3px;
 }
 
 .qed-content {

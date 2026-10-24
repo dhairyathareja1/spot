@@ -1,10 +1,12 @@
-import { useEffect, useReducer, useState } from 'react'
+import { Suspense, lazy, useEffect, useMemo, useReducer, useState } from 'react'
 import { boardDifferenceIndices, boardDistance } from './engine/applyMove'
+import { parse } from './engine/parse'
+import { proofSize } from './engine/proofSize'
+import { rateProof } from './engine/rating'
 import type { SavedProgress } from './ui/storage'
-import { loadProgress, markLevelCleared, saveProgress } from './ui/storage'
+import { loadProgress, markLevelCleared, saveBestStars, saveProgress } from './ui/storage'
 import { levels } from './levels/levels'
 import { BoardView } from './ui/BoardView'
-import { Editor } from './ui/Editor'
 import { GoalPanel } from './ui/GoalPanel'
 import { SyntaxHelp } from './ui/SyntaxHelp'
 import { StepList } from './ui/StepList'
@@ -12,6 +14,8 @@ import { TargetView } from './ui/TargetView'
 import { getBlockMotionState } from './ui/blockMotionState'
 import { createInitialState, reducer } from './ui/state'
 import './ui/styles.css'
+
+const Editor = lazy(() => import('./ui/Editor').then((module) => ({ default: module.Editor })))
 
 function initializeState(progress: SavedProgress) {
   const initial = createInitialState()
@@ -36,6 +40,11 @@ function App() {
   const failingLine = failedAt?.diagnostic.line ?? state.diagnostic?.line
   const errorIndices = showingMoveError ? failedAt?.diagnostic.error?.indices ?? [] : []
   const showQED = Boolean(trace?.solved && state.cursor === lastCursor && !state.diagnostic)
+  const sourceProofSize = useMemo(() => {
+    const parsed = parse(state.source)
+    return parsed.ok ? proofSize(parsed.value) : 0
+  }, [state.source])
+  const currentStars = rateProof(showQED, sourceProofSize, level.par)
 
   useEffect(() => {
     if (!isPlaying) return
@@ -48,8 +57,10 @@ function App() {
   useEffect(() => saveProgress(progress), [progress])
 
   useEffect(() => {
-    if (showQED) markLevelCleared(level.id)
-  }, [level.id, showQED])
+    if (!showQED || currentStars === 0) return
+    markLevelCleared(level.id)
+    saveBestStars(level.id, currentStars)
+  }, [currentStars, level.id, showQED])
 
   function getMessage(): string {
     if (state.diagnostic) {
@@ -72,8 +83,9 @@ function App() {
 
   function stopPlayback() {
     setIsPlaying(false)
-    if (showQED) {
+    if (showQED && currentStars !== 0) {
       markLevelCleared(level.id)
+      saveBestStars(level.id, currentStars)
       setProgress(loadProgress())
     }
   }
@@ -112,6 +124,7 @@ function App() {
     const nextProgress: SavedProgress = {
       clearedLevelIds: [...new Set([...savedProgress.clearedLevelIds, ...progress.clearedLevelIds])],
       drafts: { ...savedProgress.drafts, ...progress.drafts },
+      bestStars: { ...savedProgress.bestStars, ...progress.bestStars },
     }
     setProgress(nextProgress)
     dispatch({
@@ -152,12 +165,16 @@ function App() {
               selectLevel(Number(event.target.value))
             }}
           >
-            {levels.map((item) => (
-              <option value={item.id} key={item.id}>
-                {progress.clearedLevelIds.includes(item.id) || (showQED && level.id === item.id) ? '✓ ' : ''}
-                {item.id}: {item.title}
-              </option>
-            ))}
+            {levels.map((item) => {
+              const currentLevelStars = showQED && level.id === item.id ? currentStars : 0
+              const stars = Math.max(progress.bestStars[item.id] ?? 0, currentLevelStars)
+              return (
+                <option value={item.id} key={item.id}>
+                  {progress.clearedLevelIds.includes(item.id) || (showQED && level.id === item.id) ? '✓ ' : ''}
+                  {item.id}: {item.title}{stars > 0 ? ` ${formatStars(stars)}` : ''}
+                </option>
+              )
+            })}
           </select>
         </label>
       </header>
@@ -198,15 +215,17 @@ function App() {
 
         <section className="proof-panel" aria-label="Proof editor and controls">
           <div className="editor-label" id="proof-editor-label">Lean-style proof</div>
-          <Editor
-            value={state.source}
-            onChange={editSource}
-            executedLine={executedLine}
-            failingLine={failingLine}
-            onRun={runProof}
-            onStepForward={stepForward}
-            onStepBack={stepBack}
-          />
+          <Suspense fallback={<div className="proof-editor editor-loading" aria-hidden="true" />}>
+            <Editor
+              value={state.source}
+              onChange={editSource}
+              executedLine={executedLine}
+              failingLine={failingLine}
+              onRun={runProof}
+              onStepForward={stepForward}
+              onStepBack={stepBack}
+            />
+          </Suspense>
           <SyntaxHelp />
           <div className="controls">
             <button className="run-button" type="button" onClick={runProof}>Run</button>
@@ -231,7 +250,12 @@ function App() {
           <div className={`message-area${showQED ? ' message-success' : ''}${state.diagnostic || showingMoveError ? ' message-error' : ''}`} role="status" aria-live="polite">
             {showQED && (
               <div className="qed-content">
-                <strong className="qed-banner">QED</strong>
+                <strong className="qed-banner">
+                  QED
+                  <span className="qed-stars" role="img" aria-label={`${currentStars} out of 3 stars`}>
+                    {formatStars(currentStars)}
+                  </span>
+                </strong>
                 <button type="button" onClick={nextLevel}>Next level →</button>
               </div>
             )}
@@ -244,3 +268,7 @@ function App() {
 }
 
 export default App
+
+function formatStars(stars: number): string {
+  return `${'★'.repeat(stars)}${'☆'.repeat(3 - stars)}`
+}
