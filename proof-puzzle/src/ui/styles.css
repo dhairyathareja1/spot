@@ -20,8 +20,7 @@ body {
 }
 
 button,
-select,
-textarea {
+select {
   font: inherit;
 }
 
@@ -45,7 +44,7 @@ button:hover:not(:disabled) {
 
 button:focus-visible,
 select:focus-visible,
-textarea:focus-visible {
+.proof-editor:focus-within {
   outline: 2px solid #93c5fd;
   outline-offset: 2px;
 }
@@ -326,19 +325,80 @@ h2 {
   font-weight: 650;
 }
 
-textarea {
+.proof-editor {
   width: 100%;
-  min-height: 270px;
-  resize: vertical;
-  padding: 16px;
-  color: #e5e7eb;
+  overflow: hidden;
   background: #0b0e14;
   border: 1px solid #343b4a;
   border-radius: 9px;
-  font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+}
+
+.proof-editor .cm-editor {
+  min-height: 270px;
+  color: #e5e7eb;
+  background: #0b0e14;
   font-size: 14px;
+}
+
+.proof-editor .cm-scroller {
+  min-height: 270px;
+  font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
   line-height: 1.6;
-  tab-size: 2;
+}
+
+.proof-editor .cm-content {
+  padding: 16px 0;
+}
+
+.proof-editor .cm-line {
+  padding: 0 16px;
+}
+
+.proof-editor .cm-gutters {
+  color: #768195;
+  background: #0b0e14;
+  border-right: 1px solid #222938;
+}
+
+.proof-editor .cm-gutterElement {
+  padding: 0 8px 0 12px;
+}
+
+.proof-editor .cm-cursor {
+  border-left-color: #f3f4f6;
+}
+
+.proof-editor .cm-line.cm-proof-executing-line {
+  background: rgb(59 130 246 / 16%);
+  box-shadow: inset 3px 0 #60a5fa;
+}
+
+.proof-editor .cm-line.cm-proof-failing-line {
+  text-decoration: underline wavy #f87171;
+  text-decoration-thickness: 1.5px;
+  text-underline-offset: 4px;
+}
+
+.proof-editor .cm-proof-keyword {
+  color: #c4b5fd;
+  font-weight: 700;
+}
+
+.proof-editor .cm-proof-tactic {
+  color: #93c5fd;
+  font-weight: 700;
+}
+
+.proof-editor .cm-proof-color-blue { color: #60a5fa; }
+.proof-editor .cm-proof-color-green { color: #4ade80; }
+.proof-editor .cm-proof-color-yellow { color: #facc15; }
+.proof-editor .cm-proof-color-purple { color: #c084fc; }
+.proof-editor .cm-proof-color-orange { color: #fb923c; }
+.proof-editor .cm-proof-color-teal { color: #2dd4bf; }
+
+.proof-editor .cm-proof-comment {
+  color: #8993a5;
+  font-style: italic;
 }
 
 .syntax-help {
