@@ -7,6 +7,7 @@ import { BoardView } from './ui/BoardView'
 import { GoalPanel } from './ui/GoalPanel'
 import { SyntaxHelp } from './ui/SyntaxHelp'
 import { TargetView } from './ui/TargetView'
+import { getBlockMotionState } from './ui/blockMotionState'
 import { createInitialState, reducer } from './ui/state'
 import './ui/styles.css'
 
@@ -23,6 +24,7 @@ function App() {
   const trace = state.trace
   const lastCursor = Math.max(0, (trace?.states.length ?? 1) - 1)
   const currentBoard = trace?.states[state.cursor] ?? level.start
+  const blockMotionState = getBlockMotionState(level.id, level.start, trace, state.cursor)
   const distance = trace?.distance[state.cursor] ?? boardDistance(level.start, level.target)
   const differingIndices = boardDifferenceIndices(currentBoard, level.target)
   const failedAt = trace?.failedAt
@@ -148,6 +150,9 @@ function App() {
             <h2>Board</h2>
             <BoardView
               board={currentBoard}
+              blockIds={blockMotionState.blockIds}
+              rotationDegrees={blockMotionState.rotationDegrees}
+              animated
               errorIndices={errorIndices}
               differingIndices={differingIndices}
             />
