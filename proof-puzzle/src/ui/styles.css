@@ -123,6 +123,10 @@ h2 {
   align-items: start;
 }
 
+.game-layout-wide {
+  grid-template-columns: minmax(0, 1fr);
+}
+
 .board-panel,
 .proof-panel {
   min-width: 0;
@@ -642,5 +646,47 @@ h2 {
   .target-board {
     --block-size: 38px;
     --block-gap: 5px;
+  }
+
+  .board-section-wide {
+    --block-size: clamp(24px, calc(12.5vw - 11.5px), 36px);
+    --block-gap: 4px;
+  }
+
+  .board-section-wide .block-index {
+    top: 2px;
+    left: 3px;
+    font-size: 9px;
+  }
+
+  .board-section-wide .block-rotation {
+    font-size: 16px;
+  }
+
+  .board-section-wide .block-icons {
+    right: 2px;
+    bottom: 2px;
+    font-size: 9px;
+  }
+
+  .target-board-wide {
+    --block-size: clamp(18px, calc(12.5vw - 10.625px), 38px);
+    --block-gap: 3px;
+  }
+
+  .target-board-wide .block-index {
+    top: 2px;
+    left: 3px;
+    font-size: 8px;
+  }
+
+  .target-board-wide .block-rotation {
+    font-size: 12px;
+  }
+
+  .target-board-wide .block-icons {
+    right: 2px;
+    bottom: 2px;
+    font-size: 8px;
   }
 }
