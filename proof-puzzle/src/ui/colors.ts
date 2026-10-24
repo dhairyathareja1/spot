@@ -1,5 +1,8 @@
 import type { Board, Color } from '../engine/types'
 
+/** Tint for each chapter's backdrop, matching the gradient themes in styles.css. */
+export const chapterTint = (chapter: number) => (['blue', 'yellow', 'blue', 'lime'] as const)[chapter] ?? 'blue'
+
 export const blockColors: Record<Color, string> = {
   blue: '#3b82f6',
   green: '#22c55e',

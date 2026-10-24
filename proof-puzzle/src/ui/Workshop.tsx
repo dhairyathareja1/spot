@@ -67,7 +67,7 @@ export function Workshop({ data }: { data?: string }) {
   }
 
   return (
-    <div className="workshop">
+    <div className="workshop tint-lime">
       <header className="play-header">
         <div className="play-title">
           <a className="back-link" href="#/" aria-label="Back to all levels">←</a>

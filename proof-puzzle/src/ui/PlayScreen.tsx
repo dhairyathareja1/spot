@@ -17,6 +17,7 @@ import { Timeline } from './Timeline'
 import { getBlockMotionState } from './blockMotionState'
 import { burstConfetti } from './confetti'
 import { describeDiagnostic, describeMoveError } from './messages'
+import { chapterTint } from './colors'
 import { appendTactic, cursorForCaret, lineNotes, normalizeProof } from './proofState'
 import type { Puzzle } from './puzzles'
 import { navigate, routeHref } from './router'
@@ -213,7 +214,7 @@ export function PlayScreen({ puzzle, progress, onProgress, sharedProof }: PlaySc
   const bestStars = progress.bestStars[puzzle.key] ?? 0
 
   return (
-    <div className="play-screen">
+    <div className={`play-screen tint-${puzzle.kind === 'level' ? chapterTint(level.chapter) : puzzle.kind === 'custom' ? 'lime' : 'yellow'}`}>
       <header className="play-header">
         <div className="play-title">
           <a className="back-link" href="#/" aria-label="Back to all levels">←</a>

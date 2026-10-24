@@ -108,7 +108,7 @@ export function Editor({
       onCreateEditor={(view) => {
         viewRef.current = view
       }}
-      theme="dark"
+      theme="light"
       minHeight="240px"
       basicSetup={{
         highlightActiveLine: true,

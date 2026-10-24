@@ -5,6 +5,7 @@ import type { Difficulty } from '../engine/random'
 import { chapters, findLevel, levels, levelsInChapter } from '../levels/levels'
 import { BoardView } from './BoardView'
 import { getBlockMotionState } from './blockMotionState'
+import { chapterTint } from './colors'
 import { randomSeed } from './puzzles'
 import { routeHref } from './router'
 import { levelKey, type SavedProgress, type Settings } from './storage'
@@ -25,9 +26,8 @@ export function HomeScreen({ progress, onSettings }: HomeScreenProps) {
       <section className="hero">
         <div className="hero-copy">
           <p className="eyebrow">Functional programming · Lean 4</p>
-          <h1 className="hero-title">
-            Prove your way<br />to the picture.
-          </h1>
+          <h1 className="hero-title">Prove it!</h1>
+          <h2 className="hero-subtitle">Solve the picture with Lean&nbsp;4 proofs</h2>
           <p className="hero-lead">
             A grid of blocks, a target picture, and a proof. Every line you write is a move: <code>swap</code>,{' '}
             <code>paint</code> or <code>rotate</code>. Later you name patterns with <code>def</code> and fold them into{' '}
@@ -40,16 +40,16 @@ export function HomeScreen({ progress, onSettings }: HomeScreenProps) {
             <a className="button button-large" href="#/daily">Daily challenge</a>
           </div>
           <dl className="hero-stats">
-            <div><dt>Levels proved</dt><dd>{cleared}<span>/{levels.length}</span></dd></div>
-            <div><dt>Stars</dt><dd>{stars}<span>/{levels.length * 3}</span></dd></div>
-            <div><dt>Lean-verified levels</dt><dd>{levels.length}<span>/{levels.length}</span></dd></div>
+            <div><dt><span aria-hidden="true">✅</span> Levels proved</dt><dd>{cleared}<span>/{levels.length}</span></dd></div>
+            <div><dt><span aria-hidden="true">⭐</span> Stars</dt><dd>{stars}<span>/{levels.length * 3}</span></dd></div>
+            <div><dt><span aria-hidden="true">🧠</span> Lean-verified</dt><dd>{levels.length}<span>/{levels.length}</span></dd></div>
           </dl>
         </div>
         <HeroDemo />
       </section>
 
       {chapters.map((chapter) => (
-        <section className="chapter" key={chapter.id} aria-labelledby={`chapter-${chapter.id}`}>
+        <section className={`chapter tint-${chapterTint(chapter.id)}`} key={chapter.id} aria-labelledby={`chapter-${chapter.id}`}>
           <header className="chapter-header">
             <span className="chapter-number">{String(chapter.id).padStart(2, '0')}</span>
             <div>
@@ -82,8 +82,6 @@ export function HomeScreen({ progress, onSettings }: HomeScreenProps) {
                     </span>
                   </span>
                   <span className={`level-card-boards${level.start.cols >= 5 ? ' is-wide' : ''}`} aria-hidden="true">
-                    <BoardView board={level.start} size="sm" />
-                    <span className="level-card-arrow">→</span>
                     <BoardView board={level.target} size="sm" />
                   </span>
                   <span className="level-card-title">{level.title}</span>
