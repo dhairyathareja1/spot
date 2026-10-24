@@ -4,6 +4,7 @@ import type { SavedProgress } from './ui/storage'
 import { loadProgress, markLevelCleared, saveProgress } from './ui/storage'
 import { levels } from './levels/levels'
 import { BoardView } from './ui/BoardView'
+import { Editor } from './ui/Editor'
 import { GoalPanel } from './ui/GoalPanel'
 import { SyntaxHelp } from './ui/SyntaxHelp'
 import { TargetView } from './ui/TargetView'
@@ -29,6 +30,8 @@ function App() {
   const differingIndices = boardDifferenceIndices(currentBoard, level.target)
   const failedAt = trace?.failedAt
   const showingMoveError = Boolean(failedAt && state.cursor === failedAt.stepIndex)
+  const executedLine = state.cursor > 0 ? trace?.steps[state.cursor - 1]?.line : undefined
+  const failingLine = failedAt?.diagnostic.line ?? state.diagnostic?.line
   const errorIndices = showingMoveError ? failedAt?.diagnostic.error?.indices ?? [] : []
   const showQED = Boolean(trace?.solved && state.cursor === lastCursor && !state.diagnostic)
 
@@ -74,6 +77,16 @@ function App() {
     stopPlayback()
     setIsPlaying(true)
     dispatch({ type: 'RUN' })
+  }
+
+  function stepForward() {
+    stopPlayback()
+    dispatch({ type: 'STEP_FWD' })
+  }
+
+  function stepBack() {
+    stopPlayback()
+    dispatch({ type: 'STEP_BACK' })
   }
 
   function editSource(source: string) {
@@ -179,26 +192,29 @@ function App() {
         </section>
 
         <section className="proof-panel" aria-label="Proof editor and controls">
-          <label className="editor-label" htmlFor="proof-source">Lean-style proof</label>
-          <textarea
-            id="proof-source"
+          <div className="editor-label" id="proof-editor-label">Lean-style proof</div>
+          <Editor
             value={state.source}
-            spellCheck={false}
-            onChange={(event) => editSource(event.target.value)}
+            onChange={editSource}
+            executedLine={executedLine}
+            failingLine={failingLine}
+            onRun={runProof}
+            onStepForward={stepForward}
+            onStepBack={stepBack}
           />
           <SyntaxHelp />
           <div className="controls">
             <button className="run-button" type="button" onClick={runProof}>Run</button>
             <button
               type="button"
-              onClick={() => { stopPlayback(); dispatch({ type: 'STEP_FWD' }) }}
+              onClick={stepForward}
               disabled={!trace || state.cursor >= lastCursor}
             >
               Step
             </button>
             <button
               type="button"
-              onClick={() => { stopPlayback(); dispatch({ type: 'STEP_BACK' }) }}
+              onClick={stepBack}
               disabled={!trace || state.cursor === 0}
             >
               Back
