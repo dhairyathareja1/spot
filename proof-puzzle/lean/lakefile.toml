@@ -1,0 +1,5 @@
+name = "proof-puzzle"
+defaultTargets = ["ProofPuzzle"]
+
+[[lean_lib]]
+name = "ProofPuzzle"
