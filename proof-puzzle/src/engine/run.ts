@@ -8,7 +8,7 @@ export function run(level: Level, steps: Step[]): Trace {
 
   for (const [stepIndex, step] of steps.entries()) {
     const result = applyMove(states[states.length - 1], step.move)
-    if (!result.ok) {
+    if (result.ok === false) {
       const diagnostic: Diagnostic = {
         kind: 'move',
         line: step.line,

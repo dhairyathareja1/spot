@@ -4,7 +4,7 @@ import type { Diagnostic, Level, Trace } from './types'
 
 export function compile(level: Level, source: string): { trace: Trace } | { diagnostic: Diagnostic } {
   const parsed = parse(source)
-  if (!parsed.ok) return { diagnostic: parsed.error }
+  if (parsed.ok === false) return { diagnostic: parsed.error }
 
   const trace = run(level, parsed.value)
   if (!trace.failedAt && containsSorry(source)) {

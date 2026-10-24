@@ -27,7 +27,7 @@ export function parse(source: string): Result<Step[], Diagnostic> {
     }
 
     const result = parseStatement(tokens, line)
-    if (!result.ok) return result
+    if (result.ok === false) return err(result.error)
     steps.push(result.value)
   }
 
