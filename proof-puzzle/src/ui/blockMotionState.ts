@@ -6,12 +6,12 @@ type BlockMotionState = {
 }
 
 export function getBlockMotionState(
-  levelId: number,
+  levelKey: string,
   start: Board,
   trace: Trace | undefined,
   cursor: number,
 ): BlockMotionState {
-  const blockIds = start.cells.map((_, index) => `level-${levelId}-block-${index}`)
+  const blockIds = start.cells.map((_, index) => `${levelKey}-block-${index}`)
   const rotations = new Map<string, number>()
   blockIds.forEach((id, index) => rotations.set(id, start.cells[index].rot * 90))
   const stepsToReplay = Math.min(
