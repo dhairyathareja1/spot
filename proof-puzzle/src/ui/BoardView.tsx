@@ -3,9 +3,10 @@ import type { Board } from '../engine/types'
 type BoardViewProps = {
   board: Board
   errorIndices?: number[]
+  differingIndices?: number[]
 }
 
-export function BoardView({ board, errorIndices = [] }: BoardViewProps) {
+export function BoardView({ board, errorIndices = [], differingIndices = [] }: BoardViewProps) {
   return (
     <div
       className="board-grid"
@@ -18,7 +19,7 @@ export function BoardView({ board, errorIndices = [] }: BoardViewProps) {
     >
       {board.cells.map((block, index) => (
         <div
-          className={`board-block color-${block.color}${errorIndices.includes(index) ? ' is-error' : ''}`}
+          className={`board-block color-${block.color}${differingIndices.includes(index) ? ' is-different' : ''}${errorIndices.includes(index) ? ' is-error' : ''}`}
           key={index}
           role="gridcell"
           aria-label={`Cell ${index}, ${block.color}, rotation ${block.rot * 90} degrees`}

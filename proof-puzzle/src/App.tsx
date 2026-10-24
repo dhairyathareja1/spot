@@ -1,19 +1,29 @@
 import { useEffect, useReducer, useState } from 'react'
-import { boardDistance } from './engine/applyMove'
+import { boardDifferenceIndices, boardDistance } from './engine/applyMove'
+import type { SavedProgress } from './ui/storage'
+import { loadProgress, markLevelCleared, saveProgress } from './ui/storage'
 import { levels } from './levels/levels'
 import { BoardView } from './ui/BoardView'
+import { GoalPanel } from './ui/GoalPanel'
 import { TargetView } from './ui/TargetView'
 import { createInitialState, reducer } from './ui/state'
 import './ui/styles.css'
 
+function initializeState(progress: SavedProgress) {
+  const initial = createInitialState()
+  return { ...initial, source: progress.drafts[initial.levelId] ?? initial.source }
+}
+
 function App() {
-  const [state, dispatch] = useReducer(reducer, createInitialState())
+  const [progress, setProgress] = useState(loadProgress)
+  const [state, dispatch] = useReducer(reducer, progress, initializeState)
   const [isPlaying, setIsPlaying] = useState(false)
   const level = levels.find((item) => item.id === state.levelId) ?? levels[0]
   const trace = state.trace
   const lastCursor = Math.max(0, (trace?.states.length ?? 1) - 1)
   const currentBoard = trace?.states[state.cursor] ?? level.start
   const distance = trace?.distance[state.cursor] ?? boardDistance(level.start, level.target)
+  const differingIndices = boardDifferenceIndices(currentBoard, level.target)
   const failedAt = trace?.failedAt
   const showingMoveError = Boolean(failedAt && state.cursor === failedAt.stepIndex)
   const errorIndices = showingMoveError ? failedAt?.diagnostic.error?.indices ?? [] : []
@@ -26,6 +36,12 @@ function App() {
     const timeout = window.setTimeout(() => dispatch({ type: 'STEP_FWD' }), 600)
     return () => window.clearTimeout(timeout)
   }, [isPlaying, state.cursor, state.diagnostic, trace])
+
+  useEffect(() => saveProgress(progress), [progress])
+
+  useEffect(() => {
+    if (showQED) markLevelCleared(level.id)
+  }, [level.id, showQED])
 
   function getMessage(): string {
     if (state.diagnostic) {
@@ -45,11 +61,58 @@ function App() {
 
   function stopPlayback() {
     setIsPlaying(false)
+    if (showQED) {
+      markLevelCleared(level.id)
+      setProgress(loadProgress())
+    }
   }
 
   function runProof() {
+    stopPlayback()
     setIsPlaying(true)
     dispatch({ type: 'RUN' })
+  }
+
+  function editSource(source: string) {
+    stopPlayback()
+    dispatch({ type: 'EDIT', source })
+    setProgress((current) => ({
+      ...current,
+      drafts: { ...current.drafts, [level.id]: source },
+    }))
+  }
+
+  function selectLevel(levelId: number) {
+    stopPlayback()
+    const selectedLevel = levels.find((item) => item.id === levelId)
+    if (!selectedLevel) return
+
+    const savedProgress = loadProgress()
+    const nextProgress: SavedProgress = {
+      clearedLevelIds: [...new Set([...savedProgress.clearedLevelIds, ...progress.clearedLevelIds])],
+      drafts: { ...savedProgress.drafts, ...progress.drafts },
+    }
+    setProgress(nextProgress)
+    dispatch({
+      type: 'SELECT_LEVEL',
+      levelId,
+      source: nextProgress.drafts[levelId] ?? selectedLevel.starterCode,
+    })
+  }
+
+  function resetLevel() {
+    stopPlayback()
+    setProgress((current) => ({
+      ...current,
+      drafts: { ...current.drafts, [level.id]: level.starterCode },
+    }))
+    dispatch({ type: 'RESET' })
+  }
+
+  function nextLevel() {
+    const currentIndex = levels.findIndex((item) => item.id === level.id)
+    const next = levels[(currentIndex + 1) % levels.length]
+    selectLevel(next.id)
   }
 
   return (
@@ -65,12 +128,12 @@ function App() {
           <select
             value={level.id}
             onChange={(event) => {
-              stopPlayback()
-              dispatch({ type: 'SELECT_LEVEL', levelId: Number(event.target.value) })
+              selectLevel(Number(event.target.value))
             }}
           >
             {levels.map((item) => (
               <option value={item.id} key={item.id}>
+                {progress.clearedLevelIds.includes(item.id) || (showQED && level.id === item.id) ? '✓ ' : ''}
                 {item.id}: {item.title}
               </option>
             ))}
@@ -82,7 +145,29 @@ function App() {
         <section className="board-panel">
           <div className="board-section">
             <h2>Board</h2>
-            <BoardView board={currentBoard} errorIndices={errorIndices} />
+            <BoardView
+              board={currentBoard}
+              errorIndices={errorIndices}
+              differingIndices={differingIndices}
+            />
+            <div className="timeline-control">
+              <label htmlFor="run-cursor">
+                <span>Run position</span>
+                <output>{state.cursor} / {lastCursor}</output>
+              </label>
+              <input
+                id="run-cursor"
+                type="range"
+                min={0}
+                max={lastCursor}
+                value={state.cursor}
+                disabled={!trace || lastCursor === 0}
+                onChange={(event) => {
+                  stopPlayback()
+                  dispatch({ type: 'SET_CURSOR', cursor: Number(event.target.value) })
+                }}
+              />
+            </div>
           </div>
           <TargetView board={level.target} />
         </section>
@@ -93,19 +178,34 @@ function App() {
             id="proof-source"
             value={state.source}
             spellCheck={false}
-            onChange={(event) => {
-              stopPlayback()
-              dispatch({ type: 'EDIT', source: event.target.value })
-            }}
+            onChange={(event) => editSource(event.target.value)}
           />
           <div className="controls">
             <button className="run-button" type="button" onClick={runProof}>Run</button>
-            <button type="button" onClick={() => { stopPlayback(); dispatch({ type: 'STEP_FWD' }) }} disabled={!trace || state.cursor >= lastCursor}>Step</button>
-            <button type="button" onClick={() => { stopPlayback(); dispatch({ type: 'STEP_BACK' }) }} disabled={!trace || state.cursor === 0}>Back</button>
-            <button type="button" onClick={() => { stopPlayback(); dispatch({ type: 'RESET' }) }}>Reset</button>
+            <button
+              type="button"
+              onClick={() => { stopPlayback(); dispatch({ type: 'STEP_FWD' }) }}
+              disabled={!trace || state.cursor >= lastCursor}
+            >
+              Step
+            </button>
+            <button
+              type="button"
+              onClick={() => { stopPlayback(); dispatch({ type: 'STEP_BACK' }) }}
+              disabled={!trace || state.cursor === 0}
+            >
+              Back
+            </button>
+            <button type="button" onClick={resetLevel}>Reset</button>
           </div>
+          <GoalPanel distance={distance} differingIndices={differingIndices} />
           <div className={`message-area${showQED ? ' message-success' : ''}${state.diagnostic || showingMoveError ? ' message-error' : ''}`} role="status" aria-live="polite">
-            {showQED && <strong className="qed-banner">QED</strong>}
+            {showQED && (
+              <div className="qed-content">
+                <strong className="qed-banner">QED</strong>
+                <button type="button" onClick={nextLevel}>Next level →</button>
+              </div>
+            )}
             {!showQED && <p>{getMessage()}</p>}
           </div>
         </section>

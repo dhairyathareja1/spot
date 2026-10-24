@@ -29,6 +29,11 @@ describe('UI reducer', () => {
     state = reducer(state, { type: 'STEP_FWD' })
     state = reducer(state, { type: 'STEP_FWD' })
     expect(state.cursor).toBe(2)
+
+    state = reducer(state, { type: 'SET_CURSOR', cursor: 20 })
+    expect(state.cursor).toBe(2)
+    state = reducer(state, { type: 'SET_CURSOR', cursor: -2 })
+    expect(state.cursor).toBe(0)
   })
 
   it('clears stale traces on edits and does not run invalid proof text', () => {
@@ -64,5 +69,15 @@ describe('UI reducer', () => {
     expect(state.source).toBe('theorem level4 : Solve start target := by\n  sorry\n')
     expect(state.trace).toBeUndefined()
     expect(state.cursor).toBe(0)
+  })
+
+  it('uses a saved draft when selecting a level', () => {
+    const state = reducer(runSolution(), {
+      type: 'SELECT_LEVEL',
+      levelId: 4,
+      source: 'saved proof',
+    })
+
+    expect(state.source).toBe('saved proof')
   })
 })

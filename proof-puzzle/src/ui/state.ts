@@ -15,8 +15,9 @@ export type UIAction =
   | { type: 'RUN' }
   | { type: 'STEP_FWD' }
   | { type: 'STEP_BACK' }
+  | { type: 'SET_CURSOR'; cursor: number }
   | { type: 'RESET' }
-  | { type: 'SELECT_LEVEL'; levelId: number }
+  | { type: 'SELECT_LEVEL'; levelId: number; source?: string }
 
 export function createInitialState(levelId = levels[0].id): UIState {
   const level = levels.find((item) => item.id === levelId) ?? levels[0]
@@ -41,12 +42,16 @@ export function reducer(state: UIState, action: UIAction): UIState {
       return { ...state, cursor: Math.min(lastCursor(state), state.cursor + 1) }
     case 'STEP_BACK':
       return { ...state, cursor: Math.max(0, state.cursor - 1) }
+    case 'SET_CURSOR':
+      return { ...state, cursor: Math.max(0, Math.min(lastCursor(state), action.cursor)) }
     case 'RESET':
       return createInitialState(state.levelId)
-    case 'SELECT_LEVEL':
-      return levels.some((level) => level.id === action.levelId)
-        ? createInitialState(action.levelId)
+    case 'SELECT_LEVEL': {
+      const level = levels.find((item) => item.id === action.levelId)
+      return level
+        ? { ...createInitialState(level.id), source: action.source ?? level.starterCode }
         : state
+    }
   }
 }
 

@@ -174,6 +174,15 @@ h2 {
   box-shadow: inset 0 0 0 100px rgb(127 29 29 / 35%), 0 0 0 2px rgb(239 68 68 / 30%);
 }
 
+.board-block.is-different {
+  outline: 2px solid #f8fafc;
+  outline-offset: 2px;
+}
+
+.board-block.is-error.is-different {
+  outline-color: #f87171;
+}
+
 .block-index {
   position: absolute;
   z-index: 1;
@@ -230,9 +239,75 @@ h2 {
   font-size: 10px;
 }
 
+.timeline-control {
+  display: grid;
+  gap: 8px;
+  margin-top: 18px;
+  color: #a8afbd;
+  font-size: 13px;
+}
+
+.timeline-control label {
+  display: flex;
+  justify-content: space-between;
+}
+
+.timeline-control output {
+  color: #e5e7eb;
+  font-variant-numeric: tabular-nums;
+}
+
+.timeline-control input {
+  width: 100%;
+  margin: 0;
+  accent-color: #93c5fd;
+  cursor: pointer;
+}
+
+.timeline-control input:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
 .proof-panel {
   display: grid;
   gap: 14px;
+}
+
+.goal-panel {
+  padding: 16px;
+  color: #d4d8e0;
+  background: #10141d;
+  border: 1px solid #2b3240;
+  border-radius: 9px;
+}
+
+.goal-panel h2 {
+  margin-bottom: 10px;
+  color: #a8afbd;
+  font-size: 13px;
+  text-transform: uppercase;
+}
+
+.goal-expression {
+  margin-bottom: 8px;
+  color: #f3f4f6;
+  font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+}
+
+.goal-expression span {
+  margin-right: 8px;
+  color: #93c5fd;
+}
+
+.goal-difference,
+.goal-complete {
+  margin: 0;
+  font-size: 14px;
+}
+
+.goal-complete {
+  color: #86efac;
 }
 
 .editor-label {
@@ -306,6 +381,21 @@ textarea {
   font-size: 32px;
   font-weight: 850;
   letter-spacing: 0.12em;
+}
+
+.qed-content {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.qed-content button {
+  color: #052e16;
+  background: #86efac;
+  border-color: #86efac;
+  font-weight: 700;
 }
 
 @media (max-width: 760px) {

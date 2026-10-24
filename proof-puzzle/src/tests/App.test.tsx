@@ -10,6 +10,8 @@ describe('App', () => {
     expect(markup).toContain('<h1>First Steps</h1>')
     expect(markup).toContain('>Target</h2>')
     expect(markup).toContain('Lean-style proof')
+    expect(markup).toContain('Run position')
+    expect(markup).toContain('⊢</span> board = target')
     expect(markup).toContain('Goal: 3 cells differ')
     expect(markup).toContain('Run</button>')
     expect(markup).toContain('Step</button>')

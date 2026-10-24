@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { applyMove, boardDistance } from '../engine/applyMove'
+import { applyMove, boardDifferenceIndices, boardDistance } from '../engine/applyMove'
 import type { Board, Block, Move } from '../engine/types'
 
 function block(overrides: Partial<Block> = {}): Block {
@@ -148,5 +148,16 @@ describe('boardDistance', () => {
 
   it('counts unmatched cells when board lengths differ', () => {
     expect(boardDistance(board([block()]), board([block(), block({ color: 'teal' })]))).toBe(1)
+  })
+
+  it('returns the indices whose color or rotation differs', () => {
+    const start = board([block(), block({ color: 'green' }), block({ color: 'yellow' })])
+    const target = board([
+      block({ color: 'purple' }),
+      block({ color: 'green', rot: 1 }),
+      block({ color: 'yellow' }),
+    ])
+
+    expect(boardDifferenceIndices(start, target)).toEqual([0, 1])
   })
 })

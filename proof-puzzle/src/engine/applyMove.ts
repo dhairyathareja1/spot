@@ -12,19 +12,23 @@ export function applyMove(board: Board, move: Move): Result<Board, MoveError> {
 }
 
 export function boardDistance(a: Board, b: Board): number {
+  return boardDifferenceIndices(a, b).length
+}
+
+export function boardDifferenceIndices(a: Board, b: Board): number[] {
   const cellCount = Math.max(a.cells.length, b.cells.length)
-  let distance = 0
+  const indices: number[] = []
 
   for (let i = 0; i < cellCount; i += 1) {
     const left = a.cells[i]
     const right = b.cells[i]
 
     if (!left || !right || left.color !== right.color || left.rot !== right.rot) {
-      distance += 1
+      indices.push(i)
     }
   }
 
-  return distance
+  return indices
 }
 
 function swap(board: Board, a: number, b: number): Result<Board, MoveError> {
