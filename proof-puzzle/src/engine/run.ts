@@ -1,7 +1,7 @@
 import { applyMove, boardDistance } from './applyMove'
-import type { Diagnostic, Level, Step, Trace } from './types'
+import type { Board, Diagnostic, Step, Trace } from './types'
 
-export function run(level: Level, steps: Step[]): Trace {
+export function run(level: { start: Board; target: Board }, steps: Step[]): Trace {
   const states = [level.start]
   const distance = [boardDistance(level.start, level.target)]
   let failedAt: Trace['failedAt']

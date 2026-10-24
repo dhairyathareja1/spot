@@ -1,114 +1,96 @@
 import { describe, expect, it } from 'vitest'
 import { parse } from '../engine/parse'
-import { resolve } from '../engine/resolve'
+import { lint, resolve } from '../engine/resolve'
 
-function resolveSource(source: string) {
+const theorem = 'theorem t : Solve start target := by'
+
+function check(source: string) {
   const parsed = parse(source)
-  return parsed.ok ? resolve(parsed.value) : parsed
+  if (parsed.ok === false) throw new Error(parsed.error.message)
+  return resolve(parsed.value)
 }
 
 describe('resolve', () => {
-  it('resolves calls to earlier helpers and substitutes typed parameters', () => {
-    const result = resolveSource([
-      'def paintAt (i : Nat) (c : Color) := by',
-      '  paint i c',
-      'theorem level6 : Solve start target := by',
-      '  paintAt 2 teal',
-    ].join('\n'))
+  it('resolves built-in moves', () => {
+    const result = check(`${theorem}\n  swap 0 1\n  paint 2 teal\n  rotate 3 ccw`)
 
-    expect(result).toMatchObject({
+    expect(result).toEqual({
       ok: true,
       value: {
-        helpers: [{
-          name: 'paintAt',
-          body: [{
-            kind: 'move',
-            move: {
-              kind: 'paint',
-              i: { kind: 'parameter', type: 'Nat', name: 'i' },
-              color: { kind: 'parameter', type: 'Color', name: 'c' },
-            },
-          }],
-        }],
-        body: [{
-          kind: 'call',
-          name: 'paintAt',
-          args: [
-            { kind: 'literal', type: 'Nat', value: 2 },
-            { kind: 'literal', type: 'Color', value: 'teal' },
-          ],
-        }],
+        helpers: [],
+        body: [
+          { kind: 'swap', a: { kind: 'nat', value: 0 }, b: { kind: 'nat', value: 1 }, line: 1 },
+          { kind: 'paint', i: { kind: 'nat', value: 2 }, color: { kind: 'color', value: 'teal' }, line: 2 },
+          { kind: 'rotate', i: { kind: 'nat', value: 3 }, dir: 'ccw', line: 3 },
+        ],
       },
     })
   })
 
-  it('reports unknown names, wrong argument counts, and wrong argument types', () => {
-    const unknown = resolveSource([
-      'theorem level6 : Solve start target := by',
-      '  missingHelper 0',
-    ].join('\n'))
-    expect(unknown).toMatchObject({
-      ok: false,
-      error: { kind: 'name', line: 1, message: 'unknown tactic: missingHelper' },
-    })
+  it('reports arity errors with usage hints', () => {
+    expect(check(`${theorem}\n  swap 0`)).toMatchObject({ error: { kind: 'arity', message: 'usage: swap <i> <j>' } })
+    expect(check(`${theorem}\n  paint 0`)).toMatchObject({ error: { kind: 'arity', message: 'usage: paint <i> <color>' } })
+    expect(check(`${theorem}\n  rotate 0 left`)).toMatchObject({ error: { kind: 'arity', message: 'usage: rotate <i> [ccw]' } })
+  })
 
-    const wrongCount = resolveSource([
-      'def paintAt (i : Nat) (c : Color) := by',
-      '  paint i c',
-      'theorem level6 : Solve start target := by',
-      '  paintAt 2',
-    ].join('\n'))
-    expect(wrongCount).toMatchObject({
-      ok: false,
-      error: { kind: 'arity', line: 3, message: 'usage: paintAt <i> <c>' },
+  it('reports type errors between Nat and Color', () => {
+    expect(check(`${theorem}\n  swap 0 teal`)).toMatchObject({
+      error: { kind: 'type', line: 1, message: 'expected Nat, but teal has type Color' },
     })
-
-    const wrongType = resolveSource([
-      'def paintAt (i : Nat) (c : Color) := by',
-      '  paint i c',
-      'theorem level6 : Solve start target := by',
-      '  paintAt teal 2',
-    ].join('\n'))
-    expect(wrongType).toMatchObject({
-      ok: false,
-      error: { kind: 'type', line: 3, message: 'expected Nat, but teal has type Color' },
+    expect(check(`${theorem}\n  paint 0 3`)).toMatchObject({
+      error: { kind: 'type', message: 'expected Color, but 3 has type Nat' },
+    })
+    expect(check(`def f (c : Color) := by\n  rotate (c + 1)\n${theorem}\n  f teal`)).toMatchObject({
+      error: { kind: 'type', line: 1, message: 'arithmetic needs Nat, but c has type Color' },
     })
   })
 
-  it('allows calls only to helpers defined above the current helper', () => {
-    const result = resolveSource([
-      'def first := by',
-      '  later',
-      'def later := by',
-      '  swap 0 1',
-      'theorem level6 : Solve start target := by',
-    ].join('\n'))
+  it('reports unknown names, colors and tactics', () => {
+    expect(check(`${theorem}\n  paint 0 cyan`)).toMatchObject({ error: { kind: 'name', message: 'unknown color: cyan' } })
+    expect(check(`${theorem}\n  swap x 1`)).toMatchObject({ error: { kind: 'name', message: 'unknown identifier: x' } })
+    expect(check(`${theorem}\n  simp`)).toMatchObject({ error: { kind: 'name', message: 'unknown tactic: simp' } })
+  })
 
-    expect(result).toMatchObject({
-      ok: false,
-      error: { kind: 'name', line: 1, message: 'helper later must be defined before it is called' },
+  it('checks helper calls against their parameter types', () => {
+    const helper = 'def drop (top : Nat) (c : Color) := by\n  swap top (top + 3)\n  paint (top + 3) c'
+    expect(check(`${helper}\n${theorem}\n  drop 0 teal`).ok).toBe(true)
+    expect(check(`${helper}\n${theorem}\n  drop teal 0`)).toMatchObject({
+      error: { kind: 'type', line: 4, message: 'expected Nat, but teal has type Color' },
     })
-
-    const recursive = resolveSource([
-      'def repeat := by',
-      '  repeat',
-      'theorem level6 : Solve start target := by',
-    ].join('\n'))
-    expect(recursive).toMatchObject({
-      ok: false,
-      error: { kind: 'name', line: 1, message: 'helper repeat must be defined before it is called' },
+    expect(check(`${helper}\n${theorem}\n  drop 0`)).toMatchObject({
+      error: { kind: 'arity', message: 'usage: drop <top> <c>' },
     })
   })
 
-  it('keeps the existing unknown-color diagnostic', () => {
-    const result = resolveSource([
-      'theorem level1 : Solve start target := by',
-      '  paint 2 cyan',
-    ].join('\n'))
-
-    expect(result).toMatchObject({
-      ok: false,
-      error: { kind: 'name', line: 1, message: 'unknown color: cyan' },
+  it('forbids recursion and calls to later helpers', () => {
+    expect(check(`def f := by\n  f\n${theorem}\n  f`)).toMatchObject({
+      error: { kind: 'name', line: 1, message: 'helper f cannot call itself' },
     })
+    expect(check(`def f := by\n  g\ndef g := by\n  swap 0 1\n${theorem}\n  f`)).toMatchObject({
+      error: { kind: 'name', line: 1, message: 'helper g must be defined before it is called' },
+    })
+  })
+
+  it('types loop variables from their range or list', () => {
+    expect(check(`${theorem}\n  for c in [teal, blue] do paint 0 c`).ok).toBe(true)
+    expect(check(`${theorem}\n  for c in [teal, blue] do rotate c`)).toMatchObject({
+      error: { kind: 'type', message: 'expected Nat, but c has type Color' },
+    })
+    expect(check(`${theorem}\n  for c in [teal, 1] do rotate 0`)).toMatchObject({
+      error: { kind: 'type', message: 'list items must share one type: expected Color, but 1 has type Nat' },
+    })
+    expect(check(`${theorem}\n  for i in [0:4] do swap i (7 - i)`).ok).toBe(true)
+  })
+
+  it('lints unused parameters and helpers', () => {
+    const resolved = check(`def f (a b : Nat) := by\n  rotate a\ndef g := by\n  swap 0 1\n${theorem}\n  f 0 1`)
+
+    expect(resolved.ok).toBe(true)
+    if (resolved.ok) {
+      expect(lint(resolved.value)).toEqual([
+        { line: 0, message: 'unused variable `b`' },
+        { line: 2, message: 'helper `g` is never used' },
+      ])
+    }
   })
 })

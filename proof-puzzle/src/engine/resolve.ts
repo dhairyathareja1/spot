@@ -1,165 +1,257 @@
-import { err, ok, type Color, type Diagnostic, type ParameterType, type ParsedProof, type ProofStatement, type ResolvedHelper, type ResolvedMove, type ResolvedProof, type ResolvedStatement, type ResolvedValue, type Result } from './types'
+import {
+  err,
+  ok,
+  type Diagnostic,
+  type Expr,
+  type LoopSource,
+  type ParameterType,
+  type ParsedProof,
+  type ResolvedHelper,
+  type ResolvedProof,
+  type ResolvedStatement,
+  type Result,
+  type Statement,
+  type Warning,
+} from './types'
 
-const colors = new Set<Color>(['blue', 'green', 'yellow', 'purple', 'orange', 'teal'])
+type Scope = Map<string, ParameterType>
 
+type Context = {
+  available: ResolvedHelper[]
+  allHelperNames: Set<string>
+  currentHelper?: string
+}
+
+/** Type-checks a parsed proof: every name must be bound and every argument must have the right type. */
 export function resolve(proof: ParsedProof): Result<ResolvedProof, Diagnostic> {
-  const helperNames = new Set(proof.helpers.map((helper) => helper.name))
+  const allHelperNames = new Set(proof.helpers.map((helper) => helper.name))
   const helpers: ResolvedHelper[] = []
 
   for (const helper of proof.helpers) {
-    const parameters = new Map<string, ParameterType>(
-      helper.parameters.map((parameter) => [parameter.name, parameter.type]),
-    )
-    const body = resolveStatements(helper.body, parameters, helpers, helperNames)
+    const scope: Scope = new Map(helper.parameters.map((parameter) => [parameter.name, parameter.type]))
+    const context: Context = { available: helpers, allHelperNames, currentHelper: helper.name }
+    const body = resolveBlock(helper.body, scope, context)
     if (body.ok === false) return err(body.error)
     helpers.push({ ...helper, body: body.value })
   }
 
-  const body = resolveStatements(proof.body, new Map(), helpers, helperNames)
+  const context: Context = { available: helpers, allHelperNames }
+  const body = resolveBlock(proof.body, new Map(), context)
   if (body.ok === false) return err(body.error)
 
   return ok({ helpers, body: body.value })
 }
 
-function resolveStatements(
-  statements: ProofStatement[],
-  parameters: Map<string, ParameterType>,
-  availableHelpers: ResolvedHelper[],
-  allHelperNames: Set<string>,
-): Result<ResolvedStatement[], Diagnostic> {
-  const resolved: ResolvedStatement[] = []
+/** Lean-style linter: unused helpers and unused parameters are warnings, not errors. */
+export function lint(proof: ResolvedProof): Warning[] {
+  const warnings: Warning[] = []
+  const calledHelpers = new Set<string>()
+  const visit = (statements: ResolvedStatement[], onExpr: (expr: Expr) => void) => {
+    for (const statement of statements) {
+      switch (statement.kind) {
+        case 'swap':
+          onExpr(statement.a)
+          onExpr(statement.b)
+          break
+        case 'paint':
+          onExpr(statement.i)
+          onExpr(statement.color)
+          break
+        case 'rotate':
+          onExpr(statement.i)
+          break
+        case 'call':
+          calledHelpers.add(statement.name)
+          statement.args.forEach(onExpr)
+          break
+        case 'for':
+          loopExprs(statement.source).forEach(onExpr)
+          visit(statement.body, onExpr)
+          break
+      }
+    }
+  }
 
+  for (const helper of proof.helpers) {
+    const usedNames = new Set<string>()
+    visit(helper.body, (expr) => collectVars(expr, usedNames))
+    for (const parameter of helper.parameters) {
+      if (!usedNames.has(parameter.name)) {
+        warnings.push({ line: helper.line, message: `unused variable \`${parameter.name}\`` })
+      }
+    }
+  }
+  visit(proof.body, () => undefined)
+
+  for (const helper of proof.helpers) {
+    if (!calledHelpers.has(helper.name)) {
+      warnings.push({ line: helper.line, message: `helper \`${helper.name}\` is never used` })
+    }
+  }
+
+  return warnings.sort((a, b) => a.line - b.line)
+}
+
+function resolveBlock(statements: Statement[], scope: Scope, context: Context): Result<ResolvedStatement[], Diagnostic> {
+  const resolved: ResolvedStatement[] = []
   for (const statement of statements) {
-    const result = resolveStatement(statement, parameters, availableHelpers, allHelperNames)
+    const result = resolveStatement(statement, scope, context)
     if (result.ok === false) return err(result.error)
     resolved.push(result.value)
   }
-
   return ok(resolved)
 }
 
-function resolveStatement(
-  statement: ProofStatement,
-  parameters: Map<string, ParameterType>,
-  availableHelpers: ResolvedHelper[],
-  allHelperNames: Set<string>,
-): Result<ResolvedStatement, Diagnostic> {
-  if (statement.name === 'sorry') {
-    return statement.args.length === 0
-      ? ok({ kind: 'sorry', line: statement.line })
-      : arityError(statement, 'usage: sorry')
+function resolveStatement(statement: Statement, scope: Scope, context: Context): Result<ResolvedStatement, Diagnostic> {
+  const { line } = statement
+  if (statement.kind === 'sorry') return ok(statement)
+
+  if (statement.kind === 'for') {
+    const variableType = loopType(statement.source, scope, line)
+    if (variableType.ok === false) return err(variableType.error)
+    const inner = new Map(scope)
+    inner.set(statement.variable, variableType.value)
+    const body = resolveBlock(statement.body, inner, context)
+    if (body.ok === false) return err(body.error)
+    return ok({
+      kind: 'for',
+      variable: statement.variable,
+      variableType: variableType.value,
+      source: statement.source,
+      body: body.value,
+      line,
+    })
   }
 
-  switch (statement.name) {
-    case 'swap':
-      return resolveSwap(statement, parameters)
-    case 'paint':
-      return resolvePaint(statement, parameters)
-    case 'rotate':
-      return resolveRotate(statement, parameters)
+  const { name, args } = statement
+  switch (name) {
+    case 'sorry':
+      return arityError(line, 'usage: sorry')
+    case 'swap': {
+      if (args.length !== 2) return arityError(line, 'usage: swap <i> <j>')
+      const checked = expectTypes(args, ['Nat', 'Nat'], scope, line)
+      if (checked.ok === false) return err(checked.error)
+      return ok({ kind: 'swap', a: args[0], b: args[1], line })
+    }
+    case 'paint': {
+      if (args.length !== 2) return arityError(line, 'usage: paint <i> <color>')
+      const checked = expectTypes(args, ['Nat', 'Color'], scope, line)
+      if (checked.ok === false) return err(checked.error)
+      return ok({ kind: 'paint', i: args[0], color: args[1], line })
+    }
+    case 'rotate': {
+      const direction = args[1]
+      const directionName = direction?.kind === 'var' ? direction.name : undefined
+      if (args.length < 1 || args.length > 2 || (args.length === 2 && directionName !== 'cw' && directionName !== 'ccw')) {
+        return arityError(line, 'usage: rotate <i> [ccw]')
+      }
+      const checked = expectTypes(args.slice(0, 1), ['Nat'], scope, line)
+      if (checked.ok === false) return err(checked.error)
+      return ok({ kind: 'rotate', i: args[0], dir: directionName === 'ccw' ? 'ccw' : 'cw', line })
+    }
   }
 
-  const helper = availableHelpers.find((item) => item.name === statement.name)
+  const helper = context.available.find((item) => item.name === name)
   if (!helper) {
-    const message = allHelperNames.has(statement.name)
-      ? `helper ${statement.name} must be defined before it is called`
-      : `unknown tactic: ${statement.name}`
-    return err({ kind: 'name', line: statement.line, message })
+    let message = `unknown tactic: ${name}`
+    if (name === context.currentHelper) message = `helper ${name} cannot call itself`
+    else if (context.allHelperNames.has(name)) message = `helper ${name} must be defined before it is called`
+    return err({ kind: 'name', line, message })
   }
 
-  if (statement.args.length !== helper.parameters.length) {
-    const parametersText = helper.parameters.map((parameter) => `<${parameter.name}>`).join(' ')
-    return arityError(statement, `usage: ${helper.name}${parametersText ? ` ${parametersText}` : ''}`)
+  if (args.length !== helper.parameters.length) {
+    const usage = helper.parameters.map((parameter) => `<${parameter.name}>`).join(' ')
+    return arityError(line, `usage: ${helper.name}${usage ? ` ${usage}` : ''}`)
   }
-
-  const args: ResolvedValue[] = []
-  for (const [index, parameter] of helper.parameters.entries()) {
-    const argument = resolveValue(statement.args[index], parameter.type, parameters, statement.line)
-    if (argument.ok === false) return err(argument.error)
-    args.push(argument.value)
-  }
-
-  return ok({ kind: 'call', name: helper.name, args, line: statement.line })
+  const checked = expectTypes(args, helper.parameters.map((parameter) => parameter.type), scope, line)
+  if (checked.ok === false) return err(checked.error)
+  return ok({ kind: 'call', name: helper.name, args, line })
 }
 
-function resolveSwap(
-  statement: ProofStatement,
-  parameters: Map<string, ParameterType>,
-): Result<ResolvedStatement, Diagnostic> {
-  if (statement.args.length !== 2) return arityError(statement, 'usage: swap <i> <j>')
-  const a = resolveValue(statement.args[0], 'Nat', parameters, statement.line)
-  if (a.ok === false) return err(a.error)
-  const b = resolveValue(statement.args[1], 'Nat', parameters, statement.line)
-  if (b.ok === false) return err(b.error)
-  const move: ResolvedMove = { kind: 'swap', a: a.value, b: b.value }
-  return ok({ kind: 'move', move, line: statement.line })
+function loopType(source: LoopSource, scope: Scope, line: number): Result<ParameterType, Diagnostic> {
+  if (source.kind === 'range') {
+    const checked = expectTypes(loopExprs(source), loopExprs(source).map(() => 'Nat' as const), scope, line)
+    if (checked.ok === false) return err(checked.error)
+    return ok('Nat')
+  }
+
+  if (source.items.length === 0) return ok('Nat')
+  const first = typeOf(source.items[0], scope, line)
+  if (first.ok === false) return err(first.error)
+  const checked = expectTypes(source.items, source.items.map(() => first.value), scope, line)
+  if (checked.ok === false) {
+    return err({ ...checked.error, message: `list items must share one type: ${checked.error.message}` })
+  }
+  return ok(first.value)
 }
 
-function resolvePaint(
-  statement: ProofStatement,
-  parameters: Map<string, ParameterType>,
-): Result<ResolvedStatement, Diagnostic> {
-  if (statement.args.length !== 2) return arityError(statement, 'usage: paint <i> <color>')
-  const i = resolveValue(statement.args[0], 'Nat', parameters, statement.line)
-  if (i.ok === false) return err(i.error)
-  const color = resolveValue(statement.args[1], 'Color', parameters, statement.line)
-  if (color.ok === false) return err(color.error)
-  const move: ResolvedMove = { kind: 'paint', i: i.value, color: color.value }
-  return ok({ kind: 'move', move, line: statement.line })
+function loopExprs(source: LoopSource): Expr[] {
+  if (source.kind === 'list') return source.items
+  return source.step ? [source.start, source.stop, source.step] : [source.start, source.stop]
 }
 
-function resolveRotate(
-  statement: ProofStatement,
-  parameters: Map<string, ParameterType>,
-): Result<ResolvedStatement, Diagnostic> {
-  if (statement.args.length !== 1 && !(statement.args.length === 2 && statement.args[1] === 'ccw')) {
-    return arityError(statement, 'usage: rotate <i> [ccw]')
+function expectTypes(args: Expr[], types: ParameterType[], scope: Scope, line: number): Result<void, Diagnostic> {
+  for (const [index, arg] of args.entries()) {
+    if (arg.kind === 'var' && !scope.has(arg.name) && types[index] === 'Color') {
+      return err({ kind: 'name', line, message: `unknown color: ${arg.name}` })
+    }
+    const actual = typeOf(arg, scope, line)
+    if (actual.ok === false) return err(actual.error)
+    if (actual.value !== types[index]) {
+      return err({
+        kind: 'type',
+        line,
+        message: `expected ${types[index]}, but ${describe(arg)} has type ${actual.value}`,
+      })
+    }
   }
-  const i = resolveValue(statement.args[0], 'Nat', parameters, statement.line)
-  if (i.ok === false) return err(i.error)
-  const move: ResolvedMove = { kind: 'rotate', i: i.value, dir: statement.args[1] === 'ccw' ? 'ccw' : 'cw' }
-  return ok({ kind: 'move', move, line: statement.line })
+  return ok(undefined)
 }
 
-function resolveValue(
-  raw: string,
-  expected: ParameterType,
-  parameters: Map<string, ParameterType>,
-  line: number,
-): Result<ResolvedValue, Diagnostic> {
-  const parameterType = parameters.get(raw)
-  if (parameterType) {
-    return parameterType === expected
-      ? ok({ kind: 'parameter', type: parameterType, name: raw })
-      : typeError(line, `expected ${expected}, but parameter ${raw} has type ${parameterType}`)
+export function typeOf(expr: Expr, scope: Scope, line: number): Result<ParameterType, Diagnostic> {
+  switch (expr.kind) {
+    case 'nat':
+      return ok('Nat')
+    case 'color':
+      return ok('Color')
+    case 'var': {
+      const type = scope.get(expr.name)
+      return type ? ok(type) : err({ kind: 'name', line, message: `unknown identifier: ${expr.name}` })
+    }
+    case 'binop': {
+      for (const side of [expr.left, expr.right]) {
+        const type = typeOf(side, scope, line)
+        if (type.ok === false) return type
+        if (type.value !== 'Nat') {
+          return err({ kind: 'type', line, message: `arithmetic needs Nat, but ${describe(side)} has type ${type.value}` })
+        }
+      }
+      return ok('Nat')
+    }
   }
-
-  if (expected === 'Nat' && /^\d+$/.test(raw)) {
-    const value = Number(raw)
-    return Number.isSafeInteger(value)
-      ? ok({ kind: 'literal', type: 'Nat', value })
-      : typeError(line, `Nat literal is out of range: ${raw}`)
-  }
-
-  if (expected === 'Color' && colors.has(raw as Color)) {
-    return ok({ kind: 'literal', type: 'Color', value: raw as Color })
-  }
-
-  if (expected === 'Nat' && colors.has(raw as Color)) {
-    return typeError(line, `expected Nat, but ${raw} has type Color`)
-  }
-  if (expected === 'Color' && /^\d+$/.test(raw)) {
-    return typeError(line, `expected Color, but ${raw} has type Nat`)
-  }
-
-  const message = expected === 'Color' ? `unknown color: ${raw}` : `unknown name: ${raw}`
-  return err({ kind: 'name', line, message })
 }
 
-function arityError(statement: ProofStatement, message: string): Result<never, Diagnostic> {
-  return err({ kind: 'arity', line: statement.line, message })
+export function describe(expr: Expr): string {
+  switch (expr.kind) {
+    case 'nat':
+      return String(expr.value)
+    case 'color':
+      return expr.value
+    case 'var':
+      return expr.name
+    case 'binop':
+      return `(${describe(expr.left)} ${expr.op} ${describe(expr.right)})`
+  }
 }
 
-function typeError(line: number, message: string): Result<never, Diagnostic> {
-  return err({ kind: 'type', line, message })
+function collectVars(expr: Expr, names: Set<string>) {
+  if (expr.kind === 'var') names.add(expr.name)
+  if (expr.kind === 'binop') {
+    collectVars(expr.left, names)
+    collectVars(expr.right, names)
+  }
+}
+
+function arityError(line: number, message: string): Result<never, Diagnostic> {
+  return err({ kind: 'arity', line, message })
 }
