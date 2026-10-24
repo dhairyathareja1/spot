@@ -22,7 +22,11 @@ export function SyntaxHelp() {
             <span className={`syntax-color color-${color}`} key={color}>{color}</span>
           ))}
         </div>
-        <p>Indices start at 0 and go left to right, then top to bottom. Blank lines and <code>--</code> comments are ignored. <code>sorry</code> stops the proof. Other Lean tactics and helper definitions are not supported.</p>
+        <p>On levels that allow helpers, define them before the theorem with typed parameters:</p>
+        <pre><code>def &lt;name&gt; (&lt;index&gt; : Nat) (&lt;color&gt; : Color) := by</code></pre>
+        <p>Use parameter names in the helper body. Call a helper by its name followed by arguments in parameter order.</p>
+        <p>Helpers can call earlier definitions only; recursion is not supported. Calls can nest up to 8 deep and expand to at most 200 moves.</p>
+        <p>Indices start at 0 and go left to right, then top to bottom. Blank lines and <code>--</code> comments are ignored. <code>sorry</code> stops the proof. Other Lean tactics are not supported.</p>
         <p>Angle-bracketed words such as <code>&lt;i&gt;</code> are placeholders; replace them with an index or a color name.</p>
       </div>
     </details>

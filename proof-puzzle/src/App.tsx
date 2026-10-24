@@ -7,6 +7,7 @@ import { BoardView } from './ui/BoardView'
 import { Editor } from './ui/Editor'
 import { GoalPanel } from './ui/GoalPanel'
 import { SyntaxHelp } from './ui/SyntaxHelp'
+import { StepList } from './ui/StepList'
 import { TargetView } from './ui/TargetView'
 import { getBlockMotionState } from './ui/blockMotionState'
 import { createInitialState, reducer } from './ui/state'
@@ -22,6 +23,7 @@ function App() {
   const [state, dispatch] = useReducer(reducer, progress, initializeState)
   const [isPlaying, setIsPlaying] = useState(false)
   const level = levels.find((item) => item.id === state.levelId) ?? levels[0]
+  const hasWideBoard = level.start.cols >= 6
   const trace = state.trace
   const lastCursor = Math.max(0, (trace?.states.length ?? 1) - 1)
   const currentBoard = trace?.states[state.cursor] ?? level.start
@@ -51,6 +53,9 @@ function App() {
 
   function getMessage(): string {
     if (state.diagnostic) {
+      if (state.diagnostic.kind === 'limit' && state.diagnostic.message.startsWith('proof is ')) {
+        return state.diagnostic.message
+      }
       return `${state.diagnostic.kind} error on line ${state.diagnostic.line + 1}: ${state.diagnostic.message}`
     }
     if (showingMoveError && failedAt) {
@@ -157,9 +162,9 @@ function App() {
         </label>
       </header>
 
-      <main className="game-layout">
+      <main className={`game-layout${hasWideBoard ? ' game-layout-wide' : ''}`}>
         <section className="board-panel">
-          <div className="board-section">
+          <div className={`board-section${hasWideBoard ? ' board-section-wide' : ''}`}>
             <h2>Board</h2>
             <BoardView
               board={currentBoard}
@@ -222,6 +227,7 @@ function App() {
             <button type="button" onClick={resetLevel}>Reset</button>
           </div>
           <GoalPanel distance={distance} differingIndices={differingIndices} />
+          <StepList trace={trace} cursor={state.cursor} />
           <div className={`message-area${showQED ? ' message-success' : ''}${state.diagnostic || showingMoveError ? ' message-error' : ''}`} role="status" aria-live="polite">
             {showQED && (
               <div className="qed-content">

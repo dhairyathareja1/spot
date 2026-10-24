@@ -45,8 +45,50 @@ export type MoveError = {
 
 export type Step = { move: Move; line: number; callStack: string[] }
 
+export type ParameterType = 'Nat' | 'Color'
+
+export type HelperParameter = { name: string; type: ParameterType }
+
+export type ProofStatement = { name: string; args: string[]; line: number }
+
+export type HelperDefinition = {
+  name: string
+  parameters: HelperParameter[]
+  body: ProofStatement[]
+  line: number
+}
+
+export type ParsedProof = { helpers: HelperDefinition[]; body: ProofStatement[] }
+
+export type ResolvedValue =
+  | { kind: 'literal'; type: 'Nat'; value: number }
+  | { kind: 'literal'; type: 'Color'; value: Color }
+  | { kind: 'parameter'; type: ParameterType; name: string }
+
+export type ResolvedMove =
+  | { kind: 'swap'; a: ResolvedValue; b: ResolvedValue }
+  | { kind: 'paint'; i: ResolvedValue; color: ResolvedValue }
+  | { kind: 'rotate'; i: ResolvedValue; dir: 'cw' | 'ccw' }
+
+export type ResolvedStatement =
+  | { kind: 'move'; move: ResolvedMove; line: number }
+  | { kind: 'call'; name: string; args: ResolvedValue[]; line: number }
+  | { kind: 'sorry'; line: number }
+
+export type ResolvedHelper = {
+  name: string
+  parameters: HelperParameter[]
+  body: ResolvedStatement[]
+  line: number
+}
+
+export type ResolvedProof = {
+  helpers: ResolvedHelper[]
+  body: ResolvedStatement[]
+}
+
 export type Diagnostic = {
-  kind: 'parse' | 'name' | 'arity' | 'move'
+  kind: 'parse' | 'name' | 'arity' | 'type' | 'level' | 'limit' | 'move'
   line: number
   message: string
   error?: MoveError

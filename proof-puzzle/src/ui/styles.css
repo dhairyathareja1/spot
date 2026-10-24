@@ -123,6 +123,10 @@ h2 {
   align-items: start;
 }
 
+.game-layout-wide {
+  grid-template-columns: minmax(0, 1fr);
+}
+
 .board-panel,
 .proof-panel {
   min-width: 0;
@@ -317,6 +321,72 @@ h2 {
 
 .goal-complete {
   color: #86efac;
+}
+
+.step-list {
+  padding: 16px;
+  color: #d4d8e0;
+  background: #10141d;
+  border: 1px solid #2b3240;
+  border-radius: 9px;
+}
+
+.step-list h2 {
+  margin-bottom: 10px;
+  color: #a8afbd;
+  font-size: 13px;
+  text-transform: uppercase;
+}
+
+.step-list ol {
+  display: grid;
+  max-height: 240px;
+  gap: 6px;
+  overflow-y: auto;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.step-list-row {
+  padding: 8px 10px;
+  background: #171b25;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+  font-size: 12px;
+}
+
+.step-list-row.is-current {
+  border-color: #3b82f6;
+}
+
+.step-list-row.is-failing {
+  border-color: #f87171;
+}
+
+.step-list-main {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.step-list-line,
+.step-call-stack,
+.step-list-empty {
+  color: #9aa4b5;
+}
+
+.step-call-stack {
+  margin: 5px 0 0;
+  color: #c4b5fd;
+  overflow-wrap: anywhere;
+}
+
+.step-list-empty {
+  margin: 0;
+  font-size: 13px;
 }
 
 .editor-label {
@@ -576,5 +646,47 @@ h2 {
   .target-board {
     --block-size: 38px;
     --block-gap: 5px;
+  }
+
+  .board-section-wide {
+    --block-size: clamp(24px, calc(12.5vw - 11.5px), 36px);
+    --block-gap: 4px;
+  }
+
+  .board-section-wide .block-index {
+    top: 2px;
+    left: 3px;
+    font-size: 9px;
+  }
+
+  .board-section-wide .block-rotation {
+    font-size: 16px;
+  }
+
+  .board-section-wide .block-icons {
+    right: 2px;
+    bottom: 2px;
+    font-size: 9px;
+  }
+
+  .target-board-wide {
+    --block-size: clamp(18px, calc(12.5vw - 10.625px), 38px);
+    --block-gap: 3px;
+  }
+
+  .target-board-wide .block-index {
+    top: 2px;
+    left: 3px;
+    font-size: 8px;
+  }
+
+  .target-board-wide .block-rotation {
+    font-size: 12px;
+  }
+
+  .target-board-wide .block-icons {
+    right: 2px;
+    bottom: 2px;
+    font-size: 8px;
   }
 }

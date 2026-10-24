@@ -9,7 +9,7 @@ export function TargetView({ board }: TargetViewProps) {
   return (
     <section className="target-section" aria-labelledby="target-heading">
       <h2 id="target-heading">Target</h2>
-      <div className="target-board">
+      <div className={`target-board${board.cols >= 6 ? ' target-board-wide' : ''}`}>
         <BoardView board={board} />
       </div>
     </section>
