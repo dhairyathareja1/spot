@@ -10,6 +10,7 @@ export type CompileSuccess = {
   warnings: Warning[]
   size: number
   usesSorry: boolean
+  theoremLine: number
 }
 
 export type CompileResult = CompileSuccess | { diagnostic: Diagnostic; warnings?: Warning[] }
@@ -60,6 +61,7 @@ export function compile(level: LevelRules, source: string): CompileResult {
     warnings,
     size,
     usesSorry,
+    theoremLine: proof.theorem.line,
   }
 }
 

@@ -1,12 +1,13 @@
 import { execFileSync } from 'node:child_process'
 import { mkdirSync, writeFileSync } from 'node:fs'
 import { homedir } from 'node:os'
-import { join, resolve } from 'node:path'
+import { join } from 'node:path'
+import { fileURLToPath } from 'node:url'
 import { describe, expect, it } from 'vitest'
 import { exportLean, leanPlaygroundUrl } from '../engine/lean'
 import { findLevel, levels } from '../levels/levels'
 
-const leanDir = resolve(__dirname, '../../lean')
+const leanDir = fileURLToPath(new URL('../../lean', import.meta.url))
 const verifyWithLean = Boolean(process.env.LEAN_VERIFY)
 
 function exportLevel(id: number, source = findLevel(id)!.solution) {
@@ -24,7 +25,7 @@ function checkWithLean(fileName: string, code: string): string {
     return execFileSync(lean, [file], { cwd: leanDir, encoding: 'utf8', stdio: 'pipe' })
   } catch (error) {
     const failure = error as { stdout?: string; stderr?: string }
-    throw new Error(`${failure.stdout ?? ''}${failure.stderr ?? ''}`)
+    throw new Error(`${failure.stdout ?? ''}${failure.stderr ?? ''}`, { cause: error })
   }
 }
 
