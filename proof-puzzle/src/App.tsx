@@ -5,6 +5,7 @@ import { loadProgress, markLevelCleared, saveProgress } from './ui/storage'
 import { levels } from './levels/levels'
 import { BoardView } from './ui/BoardView'
 import { GoalPanel } from './ui/GoalPanel'
+import { SyntaxHelp } from './ui/SyntaxHelp'
 import { TargetView } from './ui/TargetView'
 import { createInitialState, reducer } from './ui/state'
 import './ui/styles.css'
@@ -180,6 +181,7 @@ function App() {
             spellCheck={false}
             onChange={(event) => editSource(event.target.value)}
           />
+          <SyntaxHelp />
           <div className="controls">
             <button className="run-button" type="button" onClick={runProof}>Run</button>
             <button
