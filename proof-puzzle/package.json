@@ -12,6 +12,10 @@
     "verify:lean": "LEAN_VERIFY=1 vitest run src/tests/lean.test.ts"
   },
   "dependencies": {
+    "@codemirror/autocomplete": "^6.20.4",
+    "@codemirror/lint": "^6.9.7",
+    "@codemirror/state": "^6.7.6",
+    "@codemirror/view": "^6.43.15",
     "@uiw/react-codemirror": "^4.25.12",
     "framer-motion": "^14.6.0",
     "react": "^19.3.1",
