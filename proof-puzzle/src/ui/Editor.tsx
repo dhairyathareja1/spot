@@ -1,9 +1,7 @@
-import { useCallback, useEffect, useMemo, useRef } from 'react'
+import { useCallback, useEffect, useMemo, useRef, type KeyboardEvent } from 'react'
 import CodeMirror, {
   Decoration,
   EditorView,
-  keymap,
-  Prec,
   ViewPlugin,
   type DecorationSet,
   type Range,
@@ -20,8 +18,6 @@ type EditorProps = {
   onStepBack: () => void
 }
 
-type EditorActions = Pick<EditorProps, 'onRun' | 'onStepForward' | 'onStepBack'>
-
 const keywords = new Set(['theorem', 'def', 'by', 'sorry'])
 const tactics = new Set(['swap', 'paint', 'rotate'])
 const colors = new Set(['blue', 'green', 'yellow', 'purple', 'orange', 'teal'])
@@ -36,12 +32,10 @@ export function Editor({
   onStepBack,
 }: EditorProps) {
   const changeHandler = useRef(onChange)
-  const actions = useRef<EditorActions>({ onRun, onStepForward, onStepBack })
 
   useEffect(() => {
     changeHandler.current = onChange
-    actions.current = { onRun, onStepForward, onStepBack }
-  }, [onChange, onRun, onStepForward, onStepBack])
+  }, [onChange])
 
   const handleChange = useCallback((nextValue: string) => {
     changeHandler.current(nextValue)
@@ -51,41 +45,34 @@ export function Editor({
     () => createSyntaxExtension(executedLine, failingLine),
     [executedLine, failingLine],
   )
-  const shortcutExtension = useMemo(() => Prec.highest(keymap.of([
-    {
-      key: 'Ctrl-Enter',
-      run: () => {
-        actions.current.onRun()
-        return true
-      },
-    },
-    {
-      key: 'Alt-ArrowRight',
-      run: () => {
-        actions.current.onStepForward()
-        return true
-      },
-    },
-    {
-      key: 'Alt-ArrowLeft',
-      run: () => {
-        actions.current.onStepBack()
-        return true
-      },
-    },
-  ])), [])
   const extensions = useMemo(() => [
     EditorView.contentAttributes.of({ 'aria-labelledby': 'proof-editor-label', spellcheck: 'false' }),
     EditorView.lineWrapping,
     syntaxExtension,
-    shortcutExtension,
-  ], [syntaxExtension, shortcutExtension])
+  ], [syntaxExtension])
+
+  function handleShortcut(event: KeyboardEvent<HTMLDivElement>) {
+    if (event.ctrlKey && event.key === 'Enter') {
+      event.preventDefault()
+      event.stopPropagation()
+      onRun()
+    } else if (event.altKey && event.key === 'ArrowRight') {
+      event.preventDefault()
+      event.stopPropagation()
+      onStepForward()
+    } else if (event.altKey && event.key === 'ArrowLeft') {
+      event.preventDefault()
+      event.stopPropagation()
+      onStepBack()
+    }
+  }
 
   return (
     <CodeMirror
       className="proof-editor"
       value={value}
       onChange={handleChange}
+      onKeyDownCapture={handleShortcut}
       theme="dark"
       minHeight="270px"
       basicSetup={{ highlightActiveLine: false, highlightActiveLineGutter: false }}

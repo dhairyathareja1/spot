@@ -53,4 +53,43 @@ describe('compile', () => {
       expect(result.trace.failedAt).toBeUndefined()
     }
   })
+
+  it('rejects helper definitions on levels that do not allow them', () => {
+    const result = compile(level, [
+      'def swapPair (a : Nat) (b : Nat) := by',
+      '  swap a b',
+      'theorem level1 : Solve start target := by',
+      '  swapPair 0 1',
+    ].join('\n'))
+
+    expect(result).toEqual({
+      diagnostic: {
+        kind: 'level',
+        line: 0,
+        message: 'helper definitions are not allowed on this level',
+      },
+    })
+  })
+
+  it('keeps helper body lines and call stacks in the compiled trace', () => {
+    const helperLevel = levels[5]
+    const result = compile(helperLevel, [
+      'def swapPair (a : Nat) (b : Nat) := by',
+      '  swap a b',
+      'theorem level6 : Solve start target := by',
+      '  swapPair 0 1',
+      '  swapPair 2 3',
+      '  swapPair 4 5',
+      '  swapPair 6 7',
+    ].join('\n'))
+
+    expect(result).toHaveProperty('trace')
+    if ('trace' in result) {
+      expect(result.trace.steps[0]).toEqual({
+        move: { kind: 'swap', a: 0, b: 1 },
+        line: 1,
+        callStack: ['swapPair'],
+      })
+    }
+  })
 })
