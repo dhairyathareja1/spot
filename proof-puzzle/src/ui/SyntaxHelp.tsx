@@ -1,34 +1,37 @@
-import type { Color } from '../engine/types'
+type SyntaxHelpProps = {
+  allowHelpers: boolean
+  allowLoops: boolean
+}
 
-const colors: Color[] = ['blue', 'green', 'yellow', 'purple', 'orange', 'teal']
-
-export function SyntaxHelp() {
+export function SyntaxHelp({ allowHelpers, allowLoops }: SyntaxHelpProps) {
   return (
     <details className="syntax-help">
-      <summary>Syntax help: moves and color names</summary>
-      <div className="syntax-help-content">
-        <p>The first non-empty line must be a theorem declaration:</p>
-        <pre><code>theorem &lt;name&gt; : Solve start target := by</code></pre>
-        <p>Then write one move per line:</p>
-        <ul>
-          <li><code>swap &lt;i&gt; &lt;j&gt;</code> exchanges blocks at indices <code>i</code> and <code>j</code>.</li>
-          <li><code>paint &lt;i&gt; &lt;color&gt;</code> paints the block at index <code>i</code>.</li>
-          <li><code>rotate &lt;i&gt;</code> rotates clockwise.</li>
-          <li><code>rotate &lt;i&gt; ccw</code> rotates counterclockwise.</li>
-        </ul>
-        <p className="syntax-colors-label">Color names:</p>
-        <div className="syntax-colors" aria-label="Available color names">
-          {colors.map((color) => (
-            <span className={`syntax-color color-${color}`} key={color}>{color}</span>
-          ))}
-        </div>
-        <p>On levels that allow helpers, define them before the theorem with typed parameters:</p>
-        <pre><code>def &lt;name&gt; (&lt;index&gt; : Nat) (&lt;color&gt; : Color) := by</code></pre>
-        <p>Use parameter names in the helper body. Call a helper by its name followed by arguments in parameter order.</p>
-        <p>Helpers can call earlier definitions only; recursion is not supported. Calls can nest up to 8 deep and expand to at most 200 moves.</p>
-        <p>Indices start at 0 and go left to right, then top to bottom. Blank lines and <code>--</code> comments are ignored. <code>sorry</code> stops the proof. Other Lean tactics are not supported.</p>
-        <p>Angle-bracketed words such as <code>&lt;i&gt;</code> are placeholders; replace them with an index or a color name.</p>
+      <summary>Reference</summary>
+      <div className="syntax-grid">
+        <code>swap i j</code><span>exchange blocks i and j</span>
+        <code>paint i color</code><span>blue green yellow purple orange teal</span>
+        <code>rotate i</code><span>quarter turn clockwise</span>
+        <code>rotate i ccw</code><span>quarter turn counterclockwise</span>
+        <code>sorry</code><span>leave the proof unfinished</span>
+        <code>-- note</code><span>comment, ignored</span>
+        {allowHelpers && (
+          <>
+            <code>def f (i : Nat) (c : Color) := by</code><span>a helper; call it as <code>f 3 teal</code></span>
+            <code>(i + 1)</code><span>Nat arithmetic: + - * / %, in parentheses</span>
+          </>
+        )}
+        {allowLoops && (
+          <>
+            <code>for i in [a:b] do</code><span>i = a, a+1, …, b-1</span>
+            <code>for i in [a:b:s] do</code><span>count in steps of s</span>
+            <code>for c in [teal, blue] do</code><span>loop over a list</span>
+          </>
+        )}
       </div>
+      <p className="syntax-note">
+        Blocks are numbered from 0, left to right, then top to bottom.{' '}
+        <kbd>Ctrl</kbd>/<kbd>⌘</kbd>+<kbd>Enter</kbd> plays the proof, <kbd>Alt</kbd>+<kbd>←</kbd>/<kbd>→</kbd> steps through it.
+      </p>
     </details>
   )
 }
