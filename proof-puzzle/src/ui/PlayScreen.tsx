@@ -52,17 +52,19 @@ export function PlayScreen({ puzzle, progress, onProgress, sharedProof }: PlaySc
   const [celebrated, setCelebrated] = useState<string | null>(() => normalizeProof(source))
   const [leanOpen, setLeanOpen] = useState(false)
   const [shareState, setShareState] = useState<'idle' | 'copied'>('idle')
-  const [showGhost, setShowGhost] = useState(true)
+  const [showNeeds, setShowNeeds] = useState(true)
   const [conceptOpen, setConceptOpen] = useState(() => Boolean(puzzle.concept && !progress.seenConcepts.includes(puzzle.key)))
 
   const compiled = useMemo(() => compile(level, source), [level, source])
   const success = isCompileSuccess(compiled) ? compiled : undefined
+  // while the user is mid-typing, keep showing the last proof that compiled
   const [lastGood, setLastGood] = useState<CompileSuccess | undefined>(success)
   if (success && success !== lastGood) setLastGood(success)
   const shown = success ?? lastGood
   const trace = shown?.trace
   const stale = !success
 
+  // manualCursor is set by the timeline. When it is null, the board follows the editor cursor.
   const lastCursor = trace ? trace.states.length - 1 : 0
   const caretCursor = cursorForCaret(trace, shown?.theoremLine ?? 0, caretLine)
   const cursor = Math.max(0, Math.min(manualCursor ?? caretCursor, lastCursor))
@@ -132,7 +134,7 @@ export function PlayScreen({ puzzle, progress, onProgress, sharedProof }: PlaySc
     setCelebrated(null)
   }, [trace])
 
-  // Playback: advance one move per tick, with a sound for each move.
+  // playback
   useEffect(() => {
     if (!isPlaying || !trace) return
     const timer = window.setTimeout(() => {
@@ -143,13 +145,13 @@ export function PlayScreen({ puzzle, progress, onProgress, sharedProof }: PlaySc
     return () => window.clearTimeout(timer)
   }, [isPlaying, cursor, trace])
 
-  // An illegal move buzzes once when it first appears.
+  // play the error sound once for each new error
   const failingKey = success?.trace.failedAt ? `${success.trace.failedAt.diagnostic.line}:${success.trace.failedAt.stepIndex}` : ''
   useEffect(() => {
     if (failingKey) sounds.error()
   }, [failingKey])
 
-  // A finished proof is celebrated once, after typing pauses or playback ends.
+  // show the win screen once, after typing stops or playback ends
   const normalized = normalizeProof(source)
   useEffect(() => {
     if (!solved || !success || isPlaying || celebrated === normalized) return
@@ -258,7 +260,7 @@ export function PlayScreen({ puzzle, progress, onProgress, sharedProof }: PlaySc
                 animated
                 errorIndices={errorIndices}
                 differingIndices={differing}
-                target={showGhost ? level.target : undefined}
+                target={showNeeds ? level.target : undefined}
                 selected={selected === undefined ? [] : [selected]}
                 onCellClick={clickCell}
               />
@@ -271,7 +273,7 @@ export function PlayScreen({ puzzle, progress, onProgress, sharedProof }: PlaySc
             <div className="stage-header">
               <h2>Target</h2>
               <label className="toggle">
-                <input type="checkbox" checked={showGhost} onChange={(event) => setShowGhost(event.target.checked)} />
+                <input type="checkbox" checked={showNeeds} onChange={(event) => setShowNeeds(event.target.checked)} />
                 <span>show what each block needs</span>
               </label>
             </div>

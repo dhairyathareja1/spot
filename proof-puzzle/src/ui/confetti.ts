@@ -2,7 +2,7 @@ const palette = ['#60a5fa', '#4ade80', '#facc15', '#c084fc', '#fb923c', '#2dd4bf
 
 type Particle = { x: number; y: number; vx: number; vy: number; size: number; color: string; spin: number; angle: number }
 
-/** A dependency-free confetti burst drawn on a temporary full-screen canvas. */
+// Simple confetti drawn on a temporary canvas.
 export function burstConfetti(origin = { x: 0.5, y: 0.35 }, count = 140) {
   if (typeof document === 'undefined') return
   if (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) return

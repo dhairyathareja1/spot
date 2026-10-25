@@ -5,7 +5,7 @@ import { COLORS, type Board, type Move } from './types'
 
 export type Rng = () => number
 
-/** mulberry32: tiny, fast, deterministic. Same seed, same puzzle on every machine. */
+// mulberry32: a small seeded random generator. Same seed, same puzzle.
 export function createRng(seed: number): Rng {
   let state = seed >>> 0
   return () => {

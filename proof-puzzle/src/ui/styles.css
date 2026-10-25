@@ -40,7 +40,7 @@
   color-scheme: light;
 }
 
-/* Chapter themes, one per gradient. */
+/* Chapter colors */
 .tint-yellow { --tint-top: #f3f86a; --tint-bottom: #fdfef4; --tint-ink: #6b6a00; }
 .tint-blue { --tint-top: #6ea4f6; --tint-bottom: #f3f7ff; --tint-ink: #1d4ed8; }
 .tint-lime { --tint-top: #c8f55c; --tint-bottom: #f6fdea; --tint-ink: #3f6212; }
@@ -113,7 +113,7 @@ button, input, select {
   line-height: 0.92;
 }
 
-/* ---------- Buttons ---------- */
+/* Buttons */
 
 .button {
   display: inline-flex;
@@ -321,7 +321,7 @@ button, input, select {
   color: var(--star);
 }
 
-/* ---------- Shell ---------- */
+/* Shell */
 
 .app-shell {
   width: min(1320px, 100%);
@@ -410,7 +410,7 @@ button, input, select {
   background: var(--paper);
 }
 
-/* Big gradient surfaces, like the phone screens in the reference. */
+/* Gradient panels */
 .hero,
 .chapter,
 .play-screen,
@@ -420,7 +420,7 @@ button, input, select {
   box-shadow: var(--shadow);
 }
 
-/* ---------- Home ---------- */
+/* Home */
 
 .home {
   display: grid;
@@ -783,7 +783,7 @@ a.extra-card:hover {
   margin-top: 12px;
 }
 
-/* ---------- Play ---------- */
+/* Play */
 
 .play-screen,
 .workshop {
@@ -1024,7 +1024,7 @@ a.extra-card:hover {
   font-size: 13px;
 }
 
-/* ---------- Board ---------- */
+/* Board */
 
 .board-grid {
   --block-size: var(--block-base);
@@ -1198,7 +1198,7 @@ a.extra-card:hover {
   font-weight: 800;
 }
 
-/* ---------- Timeline ---------- */
+/* Timeline */
 
 .timeline {
   display: flex;
@@ -1340,7 +1340,7 @@ a.extra-card:hover {
   font-size: 18px;
 }
 
-/* ---------- Editor ---------- */
+/* Editor */
 
 .editor-card {
   overflow: hidden;
@@ -1568,7 +1568,7 @@ a.extra-card:hover {
   font-size: 13px;
 }
 
-/* ---------- Concept card ---------- */
+/* Concept card */
 
 .concept-card {
   position: relative;
@@ -1633,7 +1633,7 @@ a.extra-card:hover {
   cursor: pointer;
 }
 
-/* ---------- Infoview ---------- */
+/* Infoview */
 
 .infoview {
   display: grid;
@@ -1892,7 +1892,7 @@ a.extra-card:hover {
   white-space: nowrap;
 }
 
-/* ---------- Reference ---------- */
+/* Reference */
 
 .syntax-grid {
   display: grid;
@@ -1921,7 +1921,7 @@ a.extra-card:hover {
   line-height: 1.8;
 }
 
-/* ---------- Dialogs ---------- */
+/* Dialogs */
 
 .dialog-backdrop {
   position: fixed;
@@ -2122,7 +2122,7 @@ a.extra-card:hover {
   pointer-events: none;
 }
 
-/* ---------- Workshop ---------- */
+/* Workshop */
 
 .workshop-layout {
   display: grid;
@@ -2233,7 +2233,7 @@ a.extra-card:hover {
   box-shadow: var(--shadow-card);
 }
 
-/* ---------- Motion & responsive ---------- */
+/* Responsive */
 
 :root[data-motion='reduced'] *,
 :root[data-motion='reduced'] *::before {
@@ -2277,7 +2277,7 @@ a.extra-card:hover {
     backdrop-filter: none;
   }
 
-  /* On phones the links become a floating bottom bar, like an app's tab bar. */
+  /* bottom nav on phones */
   .top-links {
     position: fixed;
     left: 50%;
@@ -2389,7 +2389,7 @@ a.extra-card:hover {
     padding: 16px;
   }
 
-  /* Shrink blocks so the widest board still fits the phone screen. */
+  /* smaller blocks so wide boards fit on phones */
   .board-lg,
   .board-md {
     --block-size: min(var(--block-base), calc((100vw - 96px) / (var(--cols) * 1.13)));

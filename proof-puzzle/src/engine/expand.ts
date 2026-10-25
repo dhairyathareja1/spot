@@ -33,7 +33,7 @@ type Scope = {
   depth: number
 }
 
-/** Evaluates helpers and loops into the flat list of board moves the proof performs. */
+// Turns helpers and loops into a flat list of moves.
 export function expand(proof: ResolvedProof): Result<Step[], Diagnostic> {
   const frame: Frame = { helpers: new Map(proof.helpers.map((helper) => [helper.name, helper])), steps: [] }
 
@@ -164,7 +164,7 @@ function evaluateNat(expr: Expr, env: Env, line: number): Result<number, Diagnos
     : err({ kind: 'type', line, message: `expected Nat, but ${describe(expr)} has type Color` })
 }
 
-/** Nat arithmetic follows Lean: subtraction truncates at zero and division by zero is zero. */
+// Nat math works like Lean: 2 - 5 = 0 and x / 0 = 0.
 export function evaluate(expr: Expr, env: Env, line: number): Result<Value, Diagnostic> {
   switch (expr.kind) {
     case 'nat':

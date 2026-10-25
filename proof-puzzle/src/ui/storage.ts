@@ -1,18 +1,15 @@
 import type { StarRating } from '../engine/rating'
 
 export type Settings = {
-  /** Short sound effects for moves, errors and wins. */
   sound: boolean
-  /** Background music. */
   music: boolean
 }
 
 export type SavedProgress = {
-  /** Keys of puzzles that have been proved, e.g. "level-3" or "daily-2026-10-25". */
+  // e.g. "level-3"
   cleared: string[]
   drafts: Record<string, string>
   bestStars: Record<string, StarRating>
-  /** Shortest winning proof per puzzle, so a replay can show it. */
   bestProofs: Record<string, string>
   seenConcepts: string[]
   settings: Settings
@@ -53,7 +50,6 @@ export function saveProgress(progress: SavedProgress): void {
   }
 }
 
-/** Records a win, keeping the best star rating and the shortest winning proof. */
 export function recordWin(progress: SavedProgress, key: string, stars: StarRating, proof: string): SavedProgress {
   const previousStars = progress.bestStars[key] ?? 0
   const previousProof = progress.bestProofs[key]

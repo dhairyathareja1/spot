@@ -8,8 +8,7 @@ import { exportLean, leanPlaygroundUrl } from '../engine/lean'
 import { findLevel, levels } from '../levels/levels'
 
 const leanDir = fileURLToPath(new URL('../../lean', import.meta.url))
-// `npm run verify:lean` runs Vitest with `--mode lean`. Using the mode instead of an
-// environment variable keeps the script working the same way on Windows, macOS and Linux.
+// only runs with npm run verify:lean, which uses vitest --mode lean
 const verifyWithLean = import.meta.env.MODE === 'lean'
 
 /** The Lean binary: LEAN_BIN if set, then the default elan install, then whatever is on PATH. */

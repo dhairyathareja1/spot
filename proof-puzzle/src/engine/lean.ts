@@ -11,10 +11,7 @@ export type LeanExportInput = {
 
 const theoremHeader = /^(\s*)(?:theorem\s+[A-Za-z_][A-Za-z0-9_']*|example)\b.*?:=\s*by\b(.*)$/
 
-/**
- * Turns a game proof into a standalone Lean 4 file. Tactics, loops and sorry carry over as they
- * are; each helper `def` becomes a tactic macro so calls keep the same syntax.
- */
+// Builds a .lean file from a proof. Helpers become tactic macros.
 export function exportLean({ name, start, target, source }: LeanExportInput): string {
   const lines = source.split(/\r?\n/)
   const parsed = parse(source)
@@ -65,7 +62,6 @@ export function exportLean({ name, start, target, source }: LeanExportInput): st
   return `${sections.join('\n')}\n`
 }
 
-/** A link that opens the exported proof in the official Lean 4 web editor. */
 export function leanPlaygroundUrl(code: string): string {
   return `https://live.lean-lang.org/#code=${encodeURIComponent(code)}`
 }

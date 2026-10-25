@@ -9,7 +9,6 @@ type MoveBuilderProps = {
   onClear: () => void
 }
 
-/** Click-to-prove: pick a block on the board and add a move without typing. */
 export function MoveBuilder({ board, selected, onAdd, onClear }: MoveBuilderProps) {
   if (selected === undefined) {
     return <p className="builder-hint">Tip: click a block to make a move, or click two blocks to swap them.</p>

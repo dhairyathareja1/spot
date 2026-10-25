@@ -2,9 +2,9 @@ export type StarRating = 1 | 2 | 3
 
 export type ProofScore = {
   solved: boolean
-  /** Moves the proof performed after expansion. */
+  // moves after helpers and loops are expanded
   moves: number
-  /** Statements written in the source. */
+  // lines written in the proof
   size: number
 }
 
@@ -13,10 +13,7 @@ export type ParTargets = {
   parSize?: number
 }
 
-/**
- * One star for any valid proof. Matching the move par earns the second star; the third star
- * needs the move par and, on levels that reward abstraction, a proof as short as the reference.
- */
+// 3 stars: match the move par, and the line par if the level has one. 2 stars: close to it.
 export function rateProof(score: ProofScore, targets: ParTargets): StarRating | 0 {
   if (!score.solved) return 0
 

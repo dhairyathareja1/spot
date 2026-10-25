@@ -5,7 +5,7 @@ import { decodeBase64Url, decodePuzzle, encodeBase64Url, encodePuzzle } from '..
 
 describe('share links', () => {
   it('round-trips unicode text through base64url', () => {
-    const text = 'theorem t : Solve start target := by\n  paint 0 teal -- ✓'
+    const text = 'theorem t : Solve start target := by\n  paint 0 teal -- café'
     const encoded = encodeBase64Url(text)
     expect(encoded).not.toMatch(/[+/=]/)
     expect(decodeBase64Url(encoded)).toBe(text)

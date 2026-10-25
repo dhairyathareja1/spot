@@ -53,7 +53,7 @@ export function Editor({
   onStepBack,
 }: EditorProps) {
   const viewRef = useRef<EditorView | null>(null)
-  // A stable box the CodeMirror extensions read at event time, so they never need rebuilding.
+  // holds the latest callbacks so the editor extensions are only created once
   const [callbacks] = useState(() => new CallbackBox({ onChange, onCaretLine, onRun, onStepForward, onStepBack }))
 
   useEffect(() => {

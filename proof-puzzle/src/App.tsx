@@ -18,8 +18,7 @@ function App() {
   useEffect(() => saveProgress(progress), [progress])
   useEffect(() => setSoundEnabled(settings.sound), [settings.sound])
 
-  // Browsers only allow audio after the visitor interacts with the page,
-  // so music waits for the first click or key press.
+  // browsers block audio until the user clicks or presses a key
   useEffect(() => {
     if (!settings.music) {
       stopMusic()

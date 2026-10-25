@@ -9,7 +9,7 @@ type BoardViewProps = {
   rotationDegrees?: readonly number[]
   errorIndices?: number[]
   differingIndices?: number[]
-  /** When set, differing cells show a small chip with the color and facing they need. */
+  // shows what each wrong block should become
   target?: Board
   animated?: boolean
   size?: 'lg' | 'md' | 'sm'

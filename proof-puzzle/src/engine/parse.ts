@@ -93,7 +93,7 @@ export function parse(source: string): Result<ParsedProof, Diagnostic> {
   })
 }
 
-/** Splits source into non-empty lines with comments removed, keeping zero-based line numbers. */
+// Removes comments and empty lines but keeps the original line numbers.
 function toSourceLines(source: string): SourceLine[] {
   const result: SourceLine[] = []
   let inBlockComment = false

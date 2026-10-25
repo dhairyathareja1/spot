@@ -2,11 +2,7 @@ import { applyMove, boardDifferenceIndices } from './applyMove'
 import { sameFace } from './board'
 import type { Board, Move } from './types'
 
-/**
- * Suggests a sensible next move toward the target. It prefers swaps that fix two cells at
- * once, then swaps that fix one, then in-place paints and rotations. Not always optimal,
- * but every move it suggests is legal and strictly useful.
- */
+// Picks a useful next move: a swap that fixes two blocks, then one block, then paint or rotate.
 export function suggestMove(board: Board, target: Board): Move | undefined {
   const diff = boardDifferenceIndices(board, target)
   const cells = board.cells
@@ -42,7 +38,7 @@ export function suggestMove(board: Board, target: Board): Move | undefined {
     }
   }
 
-  // A locked block in the wrong place has to be swapped in from wherever its twin lives.
+  // last option: swap in a block that at least has the right color
   for (const p of diff) {
     for (const q of diff) {
       if (p !== q && swappable(p) && swappable(q) && cells[q].color === target.cells[p]?.color) {
@@ -54,7 +50,7 @@ export function suggestMove(board: Board, target: Board): Move | undefined {
   return undefined
 }
 
-/** Plays suggested moves until the board matches; returns undefined if it gets stuck. */
+// Keeps applying suggestMove until the board matches. Returns undefined if it gets stuck.
 export function solveGreedy(start: Board, target: Board, limit = 128): Move[] | undefined {
   const moves: Move[] = []
   let board = start

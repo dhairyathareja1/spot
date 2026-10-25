@@ -31,9 +31,9 @@ export type Level = {
   story: string
   start: Board
   target: Board
-  /** Fewest moves the reference proof needs. */
+  // moves in the solution
   par: number
-  /** Statement count of the reference proof, for levels that reward abstraction. */
+  // lines in the solution, only for helper and loop levels
   parSize?: number
   allowHelpers: boolean
   allowLoops: boolean
@@ -64,9 +64,9 @@ export type MoveError = {
 
 export type Step = {
   move: Move
-  /** Source line of the move statement itself. */
+  // line of the move itself
   line: number
-  /** Theorem-body line that (transitively) produced this move. */
+  // theorem line this move came from
   origin: number
   callStack: string[]
 }

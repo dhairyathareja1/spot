@@ -48,7 +48,7 @@ export function Workshop({ data }: { data?: string }) {
       const cells = board.cells.slice()
       cells[index] = applyTool(cells[index], tool)
       const updated = { ...board, cells }
-      // Flags describe the block itself, so they travel to the other board too.
+      // lock, pin and no-turn apply to the block on both boards
       if (tool.kind === 'lock' || tool.kind === 'pin' || tool.kind === 'fix') {
         const other = which === 'start' ? 'target' : 'start'
         const otherCells = current[other].cells.slice()

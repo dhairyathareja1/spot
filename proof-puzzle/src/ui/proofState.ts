@@ -1,10 +1,8 @@
 import type { Trace } from '../engine/types'
 import type { LineNote } from './Editor'
 
-/**
- * Like Lean's infoview, the board follows the caret: with the caret on a theorem line, show the
- * board after every move that line produced. Above the theorem (inside helpers), show the end.
- */
+// Which board to show for the cursor line, like Lean's infoview.
+// If the cursor is inside a helper, show the final board.
 export function cursorForCaret(trace: Trace | undefined, theoremLine: number, caretLine: number): number {
   if (!trace) return 0
   const last = trace.states.length - 1
@@ -13,7 +11,7 @@ export function cursorForCaret(trace: Trace | undefined, theoremLine: number, ca
   return Math.min(done, last)
 }
 
-/** End-of-line notes for theorem lines: how many cells still differ after that line. */
+// Note at the end of each theorem line: blocks left, solved, or illegal move.
 export function lineNotes(trace: Trace | undefined): Record<number, LineNote> {
   const notes: Record<number, LineNote> = {}
   if (!trace) return notes
@@ -38,7 +36,7 @@ export function lineNotes(trace: Trace | undefined): Record<number, LineNote> {
   return notes
 }
 
-/** Adds a tactic to the end of the proof, replacing a lone `sorry` placeholder. */
+// Adds a move at the end, replacing sorry if it is there.
 export function appendTactic(source: string, tactic: string): string {
   const lines = source.replace(/\s+$/, '').split('\n')
   const sorryIndex = lines.findIndex((line) => line.trim() === 'sorry')
@@ -50,7 +48,7 @@ export function appendTactic(source: string, tactic: string): string {
   return `${lines.join('\n')}\n  ${tactic}\n`
 }
 
-/** Comments and blank lines do not make a proof different. */
+// Ignores comments and blank lines when comparing proofs.
 export function normalizeProof(source: string): string {
   return source
     .split('\n')

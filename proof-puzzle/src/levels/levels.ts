@@ -30,10 +30,7 @@ export function starterCode(id: number): string {
   return `theorem level${id} : Solve start target := by\n  sorry\n`
 }
 
-/**
- * A level's target is whatever its reference solution produces, so every level is solvable by
- * construction and par always matches a real proof.
- */
+// The target is made by running the solution, so every level can be solved.
 function defineLevel(spec: LevelSpec): Level {
   const allowHelpers = spec.chapter >= 2
   const allowLoops = spec.chapter >= 3

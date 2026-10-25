@@ -1,12 +1,10 @@
 import Lean
 
 /-!
-# Proof Puzzle in Lean 4
+# Proof Puzzle
 
-The game's proof language is a small set of real Lean 4 tactics. A board is a list of blocks,
-`Solve start target` says the start board can be rearranged into the target with legal moves,
-and every tactic line applies one move. An illegal move does not reduce to `some _`, so `rfl`
-fails on exactly that line, just like the red block in the game.
+Boards, moves and the `Solve` goal used by the game. `swap`, `paint`, `rotate` and `for`
+are tactics here, and a move only goes through if `rfl` shows it is legal.
 -/
 
 namespace ProofPuzzle
@@ -25,7 +23,7 @@ structure Block where
 
 abbrev Board := List Block
 
-/-- What the target compares: color and facing. -/
+/-- Color and facing of each block. This is what gets compared with the target. -/
 def Board.faces (b : Board) : List (Color × Nat) :=
   b.map fun block => (block.color, block.rot % 4)
 
@@ -50,15 +48,15 @@ def Move.apply : Move → Board → Option Board
       if x.locked || !x.canRotate then none else some (b.set i { x with rot := (x.rot + turns) % 4 })
     | none => none
 
-/-- `Solve start target`: a sequence of legal moves turns `start` into `target`. -/
+/-- `start` can be turned into `target` with legal moves. -/
 inductive Solve : Board → Board → Prop where
   | done {b t : Board} : b.faces = t.faces → Solve b t
   | step {b b' t : Board} (m : Move) : m.apply b = some b' → Solve b' t → Solve b t
 
-/-- Closes the goal as soon as the board matches the target. -/
+/-- Closes the goal once the board matches the target. -/
 macro "qed_if_solved" : tactic => `(tactic| try exact Solve.done rfl)
 
-/-- Applies one move. `rfl` only succeeds when the move is legal on the current board. -/
+/-- Applies one move. `rfl` fails if the move is not legal. -/
 macro "move_step " m:term:max : tactic =>
   `(tactic| (
     (first
@@ -81,7 +79,7 @@ private def evalNatTerm (stx : Term) : TacticM Nat := do
   | none => throwErrorAt stx "loop bounds must be Nat expressions that evaluate to a number"
 
 open Lean Elab Tactic in
-/-- Runs `body` once per value, with the loop variable replaced by that value. -/
+/-- Runs `body` once for each value, with the loop variable replaced by it. -/
 private def runLoop (x : Ident) (values : List Term) (body : TSyntax ``Lean.Parser.Tactic.tacticSeq) :
     TacticM Unit := do
   for value in values do

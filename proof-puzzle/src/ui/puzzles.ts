@@ -17,7 +17,7 @@ export type Puzzle = {
   concept?: Concept
   next?: Route
   prev?: Route
-  /** Route that reopens this exact puzzle with a proof attached. */
+  // link to this puzzle with a proof attached
   share: (proof: string) => Route
 }
 

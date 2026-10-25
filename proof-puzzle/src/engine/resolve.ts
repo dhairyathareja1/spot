@@ -22,7 +22,7 @@ type Context = {
   currentHelper?: string
 }
 
-/** Type-checks a parsed proof: every name must be bound and every argument must have the right type. */
+// Checks names and types before anything runs.
 export function resolve(proof: ParsedProof): Result<ResolvedProof, Diagnostic> {
   const allHelperNames = new Set(proof.helpers.map((helper) => helper.name))
   const helpers: ResolvedHelper[] = []
@@ -42,7 +42,7 @@ export function resolve(proof: ParsedProof): Result<ResolvedProof, Diagnostic> {
   return ok({ helpers, body: body.value })
 }
 
-/** Lean-style linter: unused helpers and unused parameters are warnings, not errors. */
+// Warnings for unused helpers and helper inputs.
 export function lint(proof: ResolvedProof): Warning[] {
   const warnings: Warning[] = []
   const calledHelpers = new Set<string>()

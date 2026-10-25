@@ -1,6 +1,5 @@
 import type { Board, Diagnostic, MoveError } from '../engine/types'
 
-/** Plain-language explanation of an illegal move, using the board it was tried on. */
 export function describeMoveError(error: MoveError, board: Board): string {
   const [index] = error.indices
   switch (error.code) {
