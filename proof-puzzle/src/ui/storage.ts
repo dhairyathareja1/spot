@@ -1,9 +1,10 @@
 import type { StarRating } from '../engine/rating'
 
 export type Settings = {
+  /** Short sound effects for moves, errors and wins. */
   sound: boolean
-  colorLabels: boolean
-  reducedMotion: boolean
+  /** Background music. */
+  music: boolean
 }
 
 export type SavedProgress = {
@@ -20,7 +21,7 @@ export type SavedProgress = {
 export const PROGRESS_STORAGE_KEY = 'proof-puzzle:progress:v2'
 const LEGACY_STORAGE_KEY = 'proof-puzzle:progress:v1'
 
-export const defaultSettings: Settings = { sound: true, colorLabels: false, reducedMotion: false }
+export const defaultSettings: Settings = { sound: true, music: true }
 
 export function levelKey(id: number): string {
   return `level-${id}`
@@ -82,8 +83,7 @@ function normalizeProgress(value: unknown): SavedProgress {
   const settings = isRecord(value.settings)
     ? {
         sound: typeof value.settings.sound === 'boolean' ? value.settings.sound : defaultSettings.sound,
-        colorLabels: typeof value.settings.colorLabels === 'boolean' ? value.settings.colorLabels : defaultSettings.colorLabels,
-        reducedMotion: typeof value.settings.reducedMotion === 'boolean' ? value.settings.reducedMotion : defaultSettings.reducedMotion,
+        music: typeof value.settings.music === 'boolean' ? value.settings.music : defaultSettings.music,
       }
     : { ...defaultSettings }
 
