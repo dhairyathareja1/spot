@@ -1,4 +1,4 @@
-# Proof Puzzle
+# Tactic Tiles
 
 A puzzle game where you change a grid of colored blocks to match a target picture by writing a
 short proof. Each line of the proof is one move: `swap`, `paint` or `rotate`. The board updates as
@@ -51,7 +51,7 @@ npm run build    # build for production into dist/
 
 ## Lean 4
 
-`lean/ProofPuzzle.lean` is a small Lean 4 library. In it, a board is a list of blocks, and
+`lean/TacticTiles.lean` is a small Lean 4 library. In it, a board is a list of blocks, and
 `Solve start target` means the start board can be turned into the target with legal moves.
 `swap`, `paint`, `rotate` and `for` are defined as Lean tactics, so the game's proof syntax is
 also Lean syntax. Each move is checked with `rfl`, which fails if the move is not legal.

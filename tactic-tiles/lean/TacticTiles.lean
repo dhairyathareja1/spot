@@ -1,13 +1,13 @@
 import Lean
 
 /-!
-# Proof Puzzle
+# Tactic Tiles
 
 Boards, moves and the `Solve` goal used by the game. `swap`, `paint`, `rotate` and `for`
 are tactics here, and a move only goes through if `rfl` shows it is legal.
 -/
 
-namespace ProofPuzzle
+namespace TacticTiles
 
 inductive Color where
   | blue | green | yellow | purple | orange | teal
@@ -116,6 +116,6 @@ elab_rules : tactic
   | `(tactic| for $x:ident in [$items:term,*] do $body:tacticSeq) =>
     runLoop x items.getElems.toList body
 
-end ProofPuzzle
+end TacticTiles
 
-export ProofPuzzle.Color (blue green yellow purple orange teal)
+export TacticTiles.Color (blue green yellow purple orange teal)

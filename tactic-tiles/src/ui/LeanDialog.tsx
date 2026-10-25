@@ -12,7 +12,7 @@ type LeanDialogProps = {
 
 export function LeanDialog({ open, code, fileName, onClose }: LeanDialogProps) {
   const [copied, setCopied] = useState(false)
-  const proofStart = code.indexOf('open ProofPuzzle')
+  const proofStart = code.indexOf('open TacticTiles')
   const proofPart = proofStart >= 0 ? code.slice(proofStart) : code
 
   function copy() {
@@ -39,7 +39,7 @@ export function LeanDialog({ open, code, fileName, onClose }: LeanDialogProps) {
         each move is a Lean tactic, and Lean checks that every move is legal. Helpers become Lean macros.
       </p>
       <pre className="lean-code"><code>{proofPart}</code></pre>
-      <p className="dialog-note">Above this part, the file also has the {code.split('\n').length - proofPart.split('\n').length} lines of the ProofPuzzle library.</p>
+      <p className="dialog-note">Above this part, the file also has the {code.split('\n').length - proofPart.split('\n').length} lines of the TacticTiles library.</p>
       <div className="dialog-actions">
         <a className="button button-primary" href={leanPlaygroundUrl(code)} target="_blank" rel="noreferrer">Open in Lean 4 online <ExternalIcon size={16} /></a>
         <button type="button" className="button" onClick={download}>Download {fileName}</button>

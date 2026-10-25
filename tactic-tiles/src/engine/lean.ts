@@ -1,4 +1,4 @@
-import library from '../../lean/ProofPuzzle.lean?raw'
+import library from '../../lean/TacticTiles.lean?raw'
 import { parse } from './parse'
 import type { Block, Board } from './types'
 
@@ -18,7 +18,7 @@ export function exportLean({ name, start, target, source }: LeanExportInput): st
   const sections: string[] = [
     library.trim(),
     '',
-    'open ProofPuzzle',
+    'open TacticTiles',
     '',
     `/-! ## ${name} -/`,
     '',

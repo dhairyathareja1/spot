@@ -15,8 +15,8 @@ export type SavedProgress = {
   settings: Settings
 }
 
-export const PROGRESS_STORAGE_KEY = 'proof-puzzle:progress:v2'
-const LEGACY_STORAGE_KEY = 'proof-puzzle:progress:v1'
+export const PROGRESS_STORAGE_KEY = 'tactic-tiles:progress:v2'
+const LEGACY_STORAGE_KEY = 'tactic-tiles:progress:v1'
 
 export const defaultSettings: Settings = { sound: true, music: true }
 

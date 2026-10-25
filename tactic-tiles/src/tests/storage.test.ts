@@ -28,7 +28,7 @@ describe('progress storage', () => {
   })
 
   it('migrates v1 progress with numeric level ids', () => {
-    values.set('proof-puzzle:progress:v1', JSON.stringify({ clearedLevelIds: [1, 3], drafts: { 1: 'draft' }, bestStars: { 3: 2 } }))
+    values.set('tactic-tiles:progress:v1', JSON.stringify({ clearedLevelIds: [1, 3], drafts: { 1: 'draft' }, bestStars: { 3: 2 } }))
 
     const progress = loadProgress()
 

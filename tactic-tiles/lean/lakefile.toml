@@ -1,0 +1,5 @@
+name = "tactic-tiles"
+defaultTargets = ["TacticTiles"]
+
+[[lean_lib]]
+name = "TacticTiles"

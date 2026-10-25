@@ -10,7 +10,7 @@ describe('App', () => {
   it('renders the home screen with every chapter and level', () => {
     const markup = renderToStaticMarkup(<App />)
 
-    expect(markup).toContain('Proof Puzzle')
+    expect(markup).toContain('Tactic Tiles')
     expect(markup).toContain('Moves')
     expect(markup).toContain('Helpers')
     expect(markup).toContain('Loops')

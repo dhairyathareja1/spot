@@ -51,7 +51,7 @@ function App() {
       <nav className="top-bar" aria-label="Main">
         <a className="brand" href="#/">
           <span className="brand-mark" aria-hidden="true"><span /><span /><span /><span /></span>
-          Proof Puzzle
+          Tactic Tiles
         </a>
         <div className="top-links">
           <a href="#/" className={route.screen === 'home' ? 'is-active' : ''}>Levels</a>
