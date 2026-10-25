@@ -1,13 +1,10 @@
-/**
- * Background music made live in the browser with the Web Audio API, so the site ships no audio
- * files. A slow four-chord loop: soft pad chords, a light arpeggio with an echo, and a bass note.
- */
+// Background music made with the Web Audio API, so no audio files are needed.
 
 const TEMPO = 84
 const EIGHTH = 60 / TEMPO / 2
 const LOOK_AHEAD = 0.5
 
-// Cmaj7, Am7, Fmaj7, G6, as MIDI note numbers.
+// Cmaj7, Am7, Fmaj7, G6 as MIDI notes
 const chords = [
   [48, 52, 55, 59],
   [45, 48, 52, 55],
@@ -39,7 +36,7 @@ function setup(): AudioContext | undefined {
   filter.frequency.value = 2200
   master.connect(filter).connect(context.destination)
 
-  // A simple echo for the arpeggio: delay fed back into itself.
+  // echo for the arpeggio
   echo = context.createGain()
   const delay = context.createDelay()
   delay.delayTime.value = EIGHTH * 3
@@ -106,8 +103,4 @@ export function stopMusic() {
   master.gain.linearRampToValueAtTime(0, now + 0.6)
   window.clearInterval(timer)
   timer = undefined
-}
-
-export function isMusicPlaying() {
-  return timer !== undefined
 }

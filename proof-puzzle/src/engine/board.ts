@@ -1,4 +1,4 @@
-import { COLORS, type Block, type Board, type Color, type Rotation } from './types'
+import type { Block, Board, Color, Rotation } from './types'
 
 const colorCodes: Record<string, Color> = { b: 'blue', g: 'green', y: 'yellow', p: 'purple', o: 'orange', t: 'teal' }
 const rotationCodes: Record<string, Rotation> = { '^': 0, '>': 1, v: 2, '<': 3 }
@@ -14,10 +14,8 @@ export function makeBoard(rows: number, cols: number, cells: Block[]): Board {
   return { rows, cols, cells }
 }
 
-/**
- * Compact board notation, one string per row: a color letter (b g y p o t) optionally
- * followed by a facing (^ > v <) and flags (* locked, ! pinned, # cannot rotate).
- */
+// Short board format, one string per row. Each block is a color letter (b g y p o t),
+// then an optional facing (^ > v <) and flags (* locked, ! pinned, # can't turn).
 export function grid(rows: string[]): Board {
   const parsedRows = rows.map((row) => row.trim().split(/\s+/).map(parseBlockCode))
   const cols = parsedRows[0]?.length ?? 0
@@ -61,11 +59,3 @@ function blockCode(block: Block): string {
 export function sameFace(a: Block | undefined, b: Block | undefined): boolean {
   return Boolean(a && b && a.color === b.color && a.rot === b.rot)
 }
-
-export function cellLabel(index: number, board: Pick<Board, 'cols'>): string {
-  return `row ${Math.floor(index / board.cols) + 1}, column ${(index % board.cols) + 1}`
-}
-
-export const colorCodeOf = (color: Color) => color[0]
-
-export const ALL_COLORS: readonly Color[] = COLORS
