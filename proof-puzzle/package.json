@@ -9,7 +9,7 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "test": "vitest run",
-    "verify:lean": "LEAN_VERIFY=1 vitest run src/tests/lean.test.ts"
+    "verify:lean": "vitest run src/tests/lean.test.ts --mode lean"
   },
   "dependencies": {
     "@codemirror/autocomplete": "^6.20.4",

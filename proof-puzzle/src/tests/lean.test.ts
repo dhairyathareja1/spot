@@ -1,5 +1,5 @@
 import { execFileSync } from 'node:child_process'
-import { mkdirSync, writeFileSync } from 'node:fs'
+import { existsSync, mkdirSync, writeFileSync } from 'node:fs'
 import { homedir } from 'node:os'
 import { join } from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -8,7 +8,15 @@ import { exportLean, leanPlaygroundUrl } from '../engine/lean'
 import { findLevel, levels } from '../levels/levels'
 
 const leanDir = fileURLToPath(new URL('../../lean', import.meta.url))
-const verifyWithLean = Boolean(process.env.LEAN_VERIFY)
+// `npm run verify:lean` runs Vitest with `--mode lean`. Using the mode instead of an
+// environment variable keeps the script working the same way on Windows, macOS and Linux.
+const verifyWithLean = import.meta.env.MODE === 'lean'
+
+/** The Lean binary: LEAN_BIN if set, then the default elan install, then whatever is on PATH. */
+function leanBinary(): string {
+  const fromElan = join(homedir(), '.elan', 'bin', process.platform === 'win32' ? 'lean.exe' : 'lean')
+  return process.env.LEAN_BIN ?? (existsSync(fromElan) ? fromElan : 'lean')
+}
 
 function exportLevel(id: number, source = findLevel(id)!.solution) {
   const level = findLevel(id)!
@@ -20,9 +28,8 @@ function checkWithLean(fileName: string, code: string): string {
   mkdirSync(generated, { recursive: true })
   const file = join(generated, fileName)
   writeFileSync(file, code)
-  const lean = join(homedir(), '.elan', 'bin', 'lean')
   try {
-    return execFileSync(lean, [file], { cwd: leanDir, encoding: 'utf8', stdio: 'pipe' })
+    return execFileSync(leanBinary(), [file], { cwd: leanDir, encoding: 'utf8', stdio: 'pipe' })
   } catch (error) {
     const failure = error as { stdout?: string; stderr?: string }
     throw new Error(`${failure.stdout ?? ''}${failure.stderr ?? ''}`, { cause: error })
