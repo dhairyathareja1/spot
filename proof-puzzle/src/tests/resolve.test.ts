@@ -41,14 +41,14 @@ describe('resolve', () => {
       error: { kind: 'type', message: 'expected Color, but 3 has type Nat' },
     })
     expect(check(`def f (c : Color) := by\n  rotate (c + 1)\n${theorem}\n  f teal`)).toMatchObject({
-      error: { kind: 'type', line: 1, message: 'arithmetic needs Nat, but c has type Color' },
+      error: { kind: 'type', line: 1, message: 'math only works on numbers (Nat), but c has type Color' },
     })
   })
 
   it('reports unknown names, colors and tactics', () => {
     expect(check(`${theorem}\n  paint 0 cyan`)).toMatchObject({ error: { kind: 'name', message: 'unknown color: cyan' } })
     expect(check(`${theorem}\n  swap x 1`)).toMatchObject({ error: { kind: 'name', message: 'unknown identifier: x' } })
-    expect(check(`${theorem}\n  simp`)).toMatchObject({ error: { kind: 'name', message: 'unknown tactic: simp' } })
+    expect(check(`${theorem}\n  simp`)).toMatchObject({ error: { kind: 'name', message: 'unknown move: simp' } })
   })
 
   it('checks helper calls against their parameter types', () => {
@@ -64,10 +64,10 @@ describe('resolve', () => {
 
   it('forbids recursion and calls to later helpers', () => {
     expect(check(`def f := by\n  f\n${theorem}\n  f`)).toMatchObject({
-      error: { kind: 'name', line: 1, message: 'helper f cannot call itself' },
+      error: { kind: 'name', line: 1, message: "helper f can't use itself" },
     })
     expect(check(`def f := by\n  g\ndef g := by\n  swap 0 1\n${theorem}\n  f`)).toMatchObject({
-      error: { kind: 'name', line: 1, message: 'helper g must be defined before it is called' },
+      error: { kind: 'name', line: 1, message: 'write helper g above the place where you use it' },
     })
   })
 
@@ -77,7 +77,7 @@ describe('resolve', () => {
       error: { kind: 'type', message: 'expected Nat, but c has type Color' },
     })
     expect(check(`${theorem}\n  for c in [teal, 1] do rotate 0`)).toMatchObject({
-      error: { kind: 'type', message: 'list items must share one type: expected Color, but 1 has type Nat' },
+      error: { kind: 'type', message: 'all items in a list need the same type: expected Color, but 1 has type Nat' },
     })
     expect(check(`${theorem}\n  for i in [0:4] do swap i (7 - i)`).ok).toBe(true)
   })
@@ -88,7 +88,7 @@ describe('resolve', () => {
     expect(resolved.ok).toBe(true)
     if (resolved.ok) {
       expect(lint(resolved.value)).toEqual([
-        { line: 0, message: 'unused variable `b`' },
+        { line: 0, message: 'input `b` is never used' },
         { line: 2, message: 'helper `g` is never used' },
       ])
     }

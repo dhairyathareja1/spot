@@ -26,12 +26,12 @@ export function lineNotes(trace: Trace | undefined): Record<number, LineNote> {
 
   for (const [origin, index] of lastStepForOrigin) {
     if (trace.failedAt?.stepIndex === index) {
-      notes[origin] = { text: '✕ illegal move', tone: 'error' }
+      notes[origin] = { text: 'illegal move', tone: 'error' }
       continue
     }
     const left = trace.distance[index + 1]
     notes[origin] = left === 0
-      ? { text: '✓ goals accomplished', tone: 'done' }
+      ? { text: 'solved!', tone: 'done' }
       : { text: `${left} left`, tone: 'progress' }
   }
 

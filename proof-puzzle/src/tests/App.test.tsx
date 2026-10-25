@@ -11,9 +11,9 @@ describe('App', () => {
     const markup = renderToStaticMarkup(<App />)
 
     expect(markup).toContain('Proof Puzzle')
-    expect(markup).toContain('Tactics')
-    expect(markup).toContain('Definitions')
-    expect(markup).toContain('Iteration')
+    expect(markup).toContain('Moves')
+    expect(markup).toContain('Helpers')
+    expect(markup).toContain('Loops')
     for (const level of levels) expect(markup).toContain(level.title)
   })
 
@@ -24,10 +24,10 @@ describe('App', () => {
     expect(markup).toContain('First Steps')
     expect(markup).toContain('>Target</h2>')
     expect(markup).toContain('level1.lean')
-    expect(markup).toContain('Tactic state')
+    expect(markup).toContain('1 goal')
     expect(markup).toContain('board = target')
-    expect(markup).toContain('3 cells differ')
-    expect(markup).toContain("declaration uses &#x27;sorry&#x27;")
+    expect(markup).toContain('3 blocks to fix')
+    expect(markup).toContain('proof is not finished (it uses sorry)')
   })
 
   it('builds daily, random and invalid custom puzzles', () => {

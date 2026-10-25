@@ -30,7 +30,7 @@ describe('compile', () => {
       diagnostic: { kind: 'arity', line: 1, message: 'usage: swap <i> <j>' },
     })
     expect(compile(level, 'swap 0 1')).toEqual({
-      diagnostic: { kind: 'parse', line: 0, message: 'expected theorem declaration ending with := by' },
+      diagnostic: { kind: 'parse', line: 0, message: 'start the proof with a theorem line that ends in := by' },
     })
   })
 
@@ -41,13 +41,13 @@ describe('compile', () => {
     if (isCompileSuccess(result)) {
       expect(result.trace.solved).toBe(false)
       expect(result.usesSorry).toBe(true)
-      expect(result.warnings).toContainEqual({ line: 0, message: "declaration uses 'sorry'" })
+      expect(result.warnings).toContainEqual({ line: 0, message: "proof is not finished (it uses sorry)" })
     }
   })
 
   it('rejects helpers and loops on levels that do not allow them', () => {
     expect(compile(level, `def f := by\n  swap 0 1\n${theorem}\n  f`)).toEqual({
-      diagnostic: { kind: 'level', line: 0, message: 'helper definitions are not allowed on this level' },
+      diagnostic: { kind: 'level', line: 0, message: 'helpers are not allowed on this level' },
     })
     expect(compile(findLevel(10)!, 'theorem t : Solve start target := by\n  for i in [0:2] do rotate i')).toEqual({
       diagnostic: { kind: 'level', line: 1, message: 'for loops are not allowed on this level' },

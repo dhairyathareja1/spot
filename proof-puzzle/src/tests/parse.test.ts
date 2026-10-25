@@ -74,7 +74,7 @@ describe('parse', () => {
   it('asks for parentheses around bare arithmetic', () => {
     expect(parse(`${theorem}\n  swap i i + 1`)).toEqual({
       ok: false,
-      error: { kind: 'parse', line: 1, message: 'wrap arithmetic in parentheses, e.g. swap i (i + 1)' },
+      error: { kind: 'parse', line: 1, message: 'put math inside brackets, like swap i (i + 1)' },
     })
   })
 
@@ -109,7 +109,7 @@ describe('parse', () => {
   it('requires an indented body after a bare do', () => {
     expect(parse(`${theorem}\n  for i in [0:3] do\n  swap 0 1`)).toEqual({
       ok: false,
-      error: { kind: 'parse', line: 1, message: 'expected an indented loop body after do' },
+      error: { kind: 'parse', line: 1, message: 'put the loop body on the next line, with extra spaces in front' },
     })
   })
 
@@ -133,15 +133,15 @@ describe('parse', () => {
   it('reports a missing theorem, misplaced helpers and duplicate theorems', () => {
     expect(parse('swap 0 1')).toEqual({
       ok: false,
-      error: { kind: 'parse', line: 0, message: 'expected theorem declaration ending with := by' },
+      error: { kind: 'parse', line: 0, message: 'start the proof with a theorem line that ends in := by' },
     })
     expect(parse(`${theorem}\n  swap 0 1\ndef late := by\n  swap 0 1`)).toMatchObject({
       ok: false,
-      error: { line: 2, message: 'helper definitions must appear before the theorem' },
+      error: { line: 2, message: 'write helpers above the theorem line' },
     })
     expect(parse(`${theorem}\n${theorem}`)).toMatchObject({
       ok: false,
-      error: { line: 1, message: 'only one theorem declaration is allowed' },
+      error: { line: 1, message: 'only one theorem line is allowed' },
     })
   })
 
@@ -163,7 +163,7 @@ describe('parse', () => {
   it('reports unexpected characters', () => {
     expect(parse(`${theorem}\n  swap 0 $`)).toEqual({
       ok: false,
-      error: { kind: 'parse', line: 1, message: 'unexpected character: $' },
+      error: { kind: 'parse', line: 1, message: 'this character is not allowed: $' },
     })
   })
 })

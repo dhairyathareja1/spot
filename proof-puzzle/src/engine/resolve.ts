@@ -77,7 +77,7 @@ export function lint(proof: ResolvedProof): Warning[] {
     visit(helper.body, (expr) => collectVars(expr, usedNames))
     for (const parameter of helper.parameters) {
       if (!usedNames.has(parameter.name)) {
-        warnings.push({ line: helper.line, message: `unused variable \`${parameter.name}\`` })
+        warnings.push({ line: helper.line, message: `input \`${parameter.name}\` is never used` })
       }
     }
   }
@@ -153,9 +153,9 @@ function resolveStatement(statement: Statement, scope: Scope, context: Context):
 
   const helper = context.available.find((item) => item.name === name)
   if (!helper) {
-    let message = `unknown tactic: ${name}`
-    if (name === context.currentHelper) message = `helper ${name} cannot call itself`
-    else if (context.allHelperNames.has(name)) message = `helper ${name} must be defined before it is called`
+    let message = `unknown move: ${name}`
+    if (name === context.currentHelper) message = `helper ${name} can't use itself`
+    else if (context.allHelperNames.has(name)) message = `write helper ${name} above the place where you use it`
     return err({ kind: 'name', line, message })
   }
 
@@ -180,7 +180,7 @@ function loopType(source: LoopSource, scope: Scope, line: number): Result<Parame
   if (first.ok === false) return err(first.error)
   const checked = expectTypes(source.items, source.items.map(() => first.value), scope, line)
   if (checked.ok === false) {
-    return err({ ...checked.error, message: `list items must share one type: ${checked.error.message}` })
+    return err({ ...checked.error, message: `all items in a list need the same type: ${checked.error.message}` })
   }
   return ok(first.value)
 }
@@ -223,7 +223,7 @@ export function typeOf(expr: Expr, scope: Scope, line: number): Result<Parameter
         const type = typeOf(side, scope, line)
         if (type.ok === false) return type
         if (type.value !== 'Nat') {
-          return err({ kind: 'type', line, message: `arithmetic needs Nat, but ${describe(side)} has type ${type.value}` })
+          return err({ kind: 'type', line, message: `math only works on numbers (Nat), but ${describe(side)} has type ${type.value}` })
         }
       }
       return ok('Nat')

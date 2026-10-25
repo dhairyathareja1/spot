@@ -247,18 +247,18 @@ function noteWidgets(notes: Record<number, LineNote>) {
 
 function completionSource(allowHelpers: boolean, allowLoops: boolean) {
   const base: Completion[] = [
-    snippetCompletion('swap ${i} ${j}', { label: 'swap', detail: 'i j', info: 'Exchange two blocks.', type: 'keyword' }),
-    snippetCompletion('paint ${i} ${color}', { label: 'paint', detail: 'i color', info: 'Repaint a block.', type: 'keyword' }),
-    snippetCompletion('rotate ${i}', { label: 'rotate', detail: 'i', info: 'Turn a block 90° clockwise.', type: 'keyword' }),
-    snippetCompletion('rotate ${i} ccw', { label: 'rotate ccw', detail: 'i', info: 'Turn a block 90° counterclockwise.', type: 'keyword' }),
+    snippetCompletion('swap ${i} ${j}', { label: 'swap', detail: 'i j', info: 'Swap two blocks.', type: 'keyword' }),
+    snippetCompletion('paint ${i} ${color}', { label: 'paint', detail: 'i color', info: 'Paint a block.', type: 'keyword' }),
+    snippetCompletion('rotate ${i}', { label: 'rotate', detail: 'i', info: 'Turn a block to the right.', type: 'keyword' }),
+    snippetCompletion('rotate ${i} ccw', { label: 'rotate ccw', detail: 'i', info: 'Turn a block to the left.', type: 'keyword' }),
     { label: 'sorry', type: 'keyword', info: 'Leave the proof unfinished.' },
     ...COLORS.map((color) => ({ label: color, type: 'constant', detail: 'Color' })),
   ]
   if (allowLoops) {
-    base.push(snippetCompletion('for ${i} in [${0}:${n}] do ${}', { label: 'for', detail: 'in [a:b] do', info: 'Repeat for every i in a range.', type: 'keyword' }))
+    base.push(snippetCompletion('for ${i} in [${0}:${n}] do ${}', { label: 'for', detail: 'in [a:b] do', info: 'Repeat a move for each number in a range.', type: 'keyword' }))
   }
   if (allowHelpers) {
-    base.push(snippetCompletion('def ${name} (${i} : Nat) := by\n  ${}', { label: 'def', detail: 'helper', info: 'Define a reusable helper.', type: 'keyword' }))
+    base.push(snippetCompletion('def ${name} (${i} : Nat) := by\n  ${}', { label: 'def', detail: 'helper', info: 'Make a helper you can use again.', type: 'keyword' }))
     base.push({ label: 'Nat', type: 'type' }, { label: 'Color', type: 'type' })
   }
 

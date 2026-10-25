@@ -31,7 +31,7 @@ export function puzzleForRoute(route: Route): Puzzle | undefined {
       return {
         key: levelKey(level.id),
         kind: 'level',
-        eyebrow: `Chapter ${level.chapter} · ${chapter?.title ?? ''} — Level ${level.id}`,
+        eyebrow: `Chapter ${level.chapter}: ${chapter?.title ?? ''}  ·  Level ${level.id}`,
         title: level.title,
         story: level.story,
         level,
@@ -43,15 +43,15 @@ export function puzzleForRoute(route: Route): Puzzle | undefined {
     }
     case 'daily': {
       const seed = dailySeed()
-      return generated(`daily-${seed}`, 'daily', `Daily challenge · ${seed}`, 'Today\'s Proof', generatePuzzle(seed, 'medium'), {
-        story: 'A fresh puzzle every day, the same for everyone. Loops and helpers are allowed.',
+      return generated(`daily-${seed}`, 'daily', `Daily puzzle · ${seed}`, 'Today\'s Puzzle', generatePuzzle(seed, 'medium'), {
+        story: 'A new puzzle every day, the same for everyone. You can use helpers and loops.',
         share: () => ({ screen: 'daily' }),
       })
     }
     case 'random': {
       const puzzle = generatePuzzle(route.seed, route.difficulty)
       return generated(`random-${route.difficulty}-${route.seed}`, 'random', `Random · ${capitalize(route.difficulty)}`, `Puzzle #${shortSeed(route.seed)}`, puzzle, {
-        story: 'A generated puzzle. Par is the best solution our solver found, so you might beat it.',
+        story: 'A puzzle made just now. The best score comes from our computer solver, so you might beat it.',
         next: { screen: 'random', difficulty: route.difficulty, seed: randomSeed() },
         share: () => ({ screen: 'random', difficulty: route.difficulty, seed: route.seed }),
       })
@@ -64,9 +64,9 @@ export function puzzleForRoute(route: Route): Puzzle | undefined {
       return {
         key: `custom-${route.data.slice(0, 48)}`,
         kind: 'custom',
-        eyebrow: 'Community puzzle',
+        eyebrow: 'Shared puzzle',
         title: custom.name,
-        story: 'Built in the workshop and shared by link.',
+        story: 'Made by a player and shared with a link.',
         level,
         share: (proof) => ({ screen: 'custom', data: route.data, proof }),
       }
@@ -115,7 +115,7 @@ function customLevel(start: Board, target: Board, par: number, allowHelpers: boo
     allowLoops,
     ...(maxLines ? { maxLines } : {}),
     starterCode: starterCode(0).replace('level0', 'puzzle'),
-    hint: 'Look for blocks that are simply in each other\'s seats first. Swaps that fix two cells are the best deal.',
+    hint: 'First look for blocks that just need to trade places. A swap that fixes two blocks at once is the best move.',
     solution,
   }
 }

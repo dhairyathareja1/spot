@@ -38,10 +38,10 @@ describe('lineNotes', () => {
     const solved = traceFor(findLevel(10)!.solution)
     const notes = lineNotes(solved.trace)
     expect(notes[4]).toEqual({ text: '6 left', tone: 'progress' })
-    expect(notes[7]).toEqual({ text: '✓ goals accomplished', tone: 'done' })
+    expect(notes[7]).toEqual({ text: 'solved!', tone: 'done' })
 
     const failed = traceFor('theorem t : Solve start target := by\n  swap 0 1\n  swap 1 1')
-    expect(lineNotes(failed.trace)[2]).toEqual({ text: '✕ illegal move', tone: 'error' })
+    expect(lineNotes(failed.trace)[2]).toEqual({ text: 'illegal move', tone: 'error' })
   })
 })
 

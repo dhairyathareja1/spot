@@ -68,17 +68,17 @@ export function parse(source: string): Result<ParsedProof, Diagnostic> {
     return err({
       kind: 'parse',
       line: headerLine?.index ?? 0,
-      message: 'expected theorem declaration ending with := by',
+      message: 'start the proof with a theorem line that ends in := by',
     })
   }
 
   const bodyLines = inlineBody(headerLine, theorem[2])
   for (const line of lines.slice(index + 1)) {
     if (/^def\b/.test(line.text)) {
-      return err({ kind: 'parse', line: line.index, message: 'helper definitions must appear before the theorem' })
+      return err({ kind: 'parse', line: line.index, message: 'write helpers above the theorem line' })
     }
     if (/^(theorem|example)\b/.test(line.text)) {
-      return err({ kind: 'parse', line: line.index, message: 'only one theorem declaration is allowed' })
+      return err({ kind: 'parse', line: line.index, message: 'only one theorem line is allowed' })
     }
     bodyLines.push(line)
   }
@@ -152,7 +152,7 @@ function parseHelperHeader(
 
   const binderText = match[2].trim()
   if (binderText.replace(binderPattern, '').trim()) {
-    return err({ kind: 'parse', line: line.index, message: 'helper parameters must be typed Nat or Color, e.g. (i : Nat)' })
+    return err({ kind: 'parse', line: line.index, message: 'each helper input needs a type, like (i : Nat) or (c : Color)' })
   }
 
   const parameters: HelperParameter[] = []
@@ -196,7 +196,7 @@ function parseBlock(lines: SourceLine[]): Result<Statement[], Diagnostic> {
           index += 1
         }
         if (nested.length === 0) {
-          return err({ kind: 'parse', line: line.index, message: 'expected an indented loop body after do' })
+          return err({ kind: 'parse', line: line.index, message: 'put the loop body on the next line, with extra spaces in front' })
         }
         const block = parseBlock(nested)
         if (block.ok === false) return err(block.error)
@@ -283,7 +283,7 @@ function parseStatement(cursor: TokenCursor): Result<Statement, Diagnostic> {
     if (token && token.kind === 'sym' && token.text !== '(') {
       return cursor.error(
         '+-*/%'.includes(token.text)
-          ? 'wrap arithmetic in parentheses, e.g. swap i (i + 1)'
+          ? 'put math inside brackets, like swap i (i + 1)'
           : `unexpected ${token.text}`,
       )
     }
@@ -349,7 +349,7 @@ function tokenize(line: SourceLine): Result<Token[], Diagnostic> {
     const match = tokenPattern.exec(line.text)
     if (!match) {
       const character = line.text.slice(position).trimStart()[0]
-      return err({ kind: 'parse', line: line.index, message: `unexpected character: ${character}` })
+      return err({ kind: 'parse', line: line.index, message: `this character is not allowed: ${character}` })
     }
     if (match[1]) tokens.push({ kind: 'ident', text: match[1] })
     else if (match[2]) tokens.push({ kind: 'num', text: match[2] })

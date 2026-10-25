@@ -24,7 +24,7 @@ export function compile(level: LevelRules, source: string): CompileResult {
 
   if (proof.helpers.length > 0 && !level.allowHelpers) {
     return {
-      diagnostic: { kind: 'level', line: proof.helpers[0].line, message: 'helper definitions are not allowed on this level' },
+      diagnostic: { kind: 'level', line: proof.helpers[0].line, message: 'helpers are not allowed on this level' },
     }
   }
 
@@ -53,7 +53,7 @@ export function compile(level: LevelRules, source: string): CompileResult {
   if (expanded.ok === false) return { diagnostic: expanded.error, warnings }
 
   const usesSorry = sorryLine(proof) !== undefined
-  if (usesSorry) warnings.push({ line: proof.theorem.line, message: "declaration uses 'sorry'" })
+  if (usesSorry) warnings.push({ line: proof.theorem.line, message: "proof is not finished (it uses sorry)" })
 
   const trace = run(level, expanded.value)
   return {
