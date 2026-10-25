@@ -43,9 +43,9 @@ export function BoardView({
       role="grid"
       aria-label={label ?? `Board, ${board.rows} rows by ${board.cols} columns`}
       style={{
-        gridTemplateColumns: `repeat(${board.cols}, ${pixels}px)`,
-        gridTemplateRows: `repeat(${board.rows}, ${pixels}px)`,
-        ['--block-size' as string]: `${pixels}px`,
+        ['--cols' as string]: board.cols,
+        ['--rows' as string]: board.rows,
+        ['--block-base' as string]: `${pixels}px`,
       }}
     >
       {board.cells.map((block, index) => {
