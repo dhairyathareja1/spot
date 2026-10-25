@@ -4,6 +4,7 @@ import { formatMove, solveGreedy } from '../engine/solver'
 import { COLORS, type Block, type Board, type Color } from '../engine/types'
 import { BoardView } from './BoardView'
 import { blockColors } from './colors'
+import { ArrowRightIcon, BackIcon, CheckIcon } from './Icons'
 import { emptyBoard } from './puzzles'
 import { navigate, routeHref } from './router'
 import { decodePuzzle, encodePuzzle, type CustomPuzzle } from './share'
@@ -70,11 +71,11 @@ export function Workshop({ data }: { data?: string }) {
     <div className="workshop tint-lime">
       <header className="play-header">
         <div className="play-title">
-          <a className="back-link" href="#/" aria-label="Back to all levels">←</a>
+          <a className="back-link" href="#/" aria-label="Back to all levels"><BackIcon size={22} /></a>
           <div>
             <p className="eyebrow">Workshop</p>
-            <h1>Design a puzzle</h1>
-            <p className="story">Paint a start board and a target board, then share the link. Anyone who opens it can play.</p>
+            <h1>Make a puzzle</h1>
+            <p className="story">Draw a start board and a target board, then share the link. Anyone with the link can play it.</p>
           </div>
         </div>
       </header>
@@ -106,7 +107,7 @@ export function Workshop({ data }: { data?: string }) {
                   title={color}
                 />
               ))}
-              {([['rotate', '↻ turn'], ['lock', 'lock'], ['pin', 'pin'], ['fix', 'no-rotate']] as const).map(([kind, label]) => (
+              {([['rotate', 'turn'], ['lock', 'lock'], ['pin', 'pin'], ['fix', 'no turning']] as const).map(([kind, label]) => (
                 <button
                   key={kind}
                   type="button"
@@ -127,10 +128,10 @@ export function Workshop({ data }: { data?: string }) {
           </label>
           <label className="toggle">
             <input type="checkbox" checked={puzzle.allowLoops} onChange={(event) => setPuzzle({ ...puzzle, allowLoops: event.target.checked })} />
-            <span>Allow for loops</span>
+            <span>Allow loops (for)</span>
           </label>
           <label className="field">
-            <span>Max lines (optional)</span>
+            <span>Line limit (optional)</span>
             <input
               type="number"
               min={1}
@@ -145,15 +146,15 @@ export function Workshop({ data }: { data?: string }) {
 
           <div className={`solver-report${playable ? ' is-ok' : ''}`}>
             {distance === 0
-              ? 'Start and target are identical. Change the target.'
+              ? 'The start and target are the same. Change the target.'
               : solution
-                ? <>Solver proof: <strong>{solution.length} moves</strong> ({solution.slice(0, 3).map(formatMove).join(', ')}{solution.length > 3 ? ', …' : ''})</>
-                : 'The solver could not find a proof. Check locked and pinned blocks.'}
+                ? <>The computer solved it in <strong>{solution.length} moves</strong> ({solution.slice(0, 3).map(formatMove).join(', ')}{solution.length > 3 ? ', and more' : ''}).</>
+                : 'The computer could not solve it. Check your locked and pinned blocks.'}
           </div>
 
           <div className="workshop-actions">
-            <button type="button" className="button button-primary" disabled={!playable} onClick={() => navigate({ screen: 'custom', data: encoded })}>Play it →</button>
-            <button type="button" className="button" disabled={!playable} onClick={copyLink}>{copied ? 'Copied ✓' : 'Copy share link'}</button>
+            <button type="button" className="button button-primary" disabled={!playable} onClick={() => navigate({ screen: 'custom', data: encoded })}>Play it <ArrowRightIcon /></button>
+            <button type="button" className="button" disabled={!playable} onClick={copyLink}>{copied ? <><CheckIcon /> Copied</> : 'Copy link'}</button>
           </div>
         </aside>
 
@@ -161,14 +162,14 @@ export function Workshop({ data }: { data?: string }) {
           <div className="workshop-board">
             <div className="stage-header">
               <h2>Start</h2>
-              <button type="button" className="chip" onClick={() => setPuzzle({ ...puzzle, start: puzzle.target })}>copy target ←</button>
+              <button type="button" className="chip" onClick={() => setPuzzle({ ...puzzle, start: puzzle.target })}>same as target</button>
             </div>
             <BoardView board={puzzle.start} onCellClick={(index) => apply('start', index)} label="Start board editor" />
           </div>
           <div className="workshop-board">
             <div className="stage-header">
               <h2>Target</h2>
-              <button type="button" className="chip" onClick={() => setPuzzle({ ...puzzle, target: puzzle.start })}>copy start →</button>
+              <button type="button" className="chip" onClick={() => setPuzzle({ ...puzzle, target: puzzle.start })}>same as start</button>
             </div>
             <BoardView board={puzzle.target} onCellClick={(index) => apply('target', index)} label="Target board editor" />
           </div>
@@ -198,7 +199,7 @@ function Stepper({ label, value, min, max, onChange }: { label: string; value: n
     <div className="field stepper">
       <span>{label}</span>
       <div>
-        <button type="button" className="icon-button" onClick={() => onChange(Math.max(min, value - 1))} disabled={value <= min} aria-label={`Fewer ${label.toLowerCase()}`}>−</button>
+        <button type="button" className="icon-button" onClick={() => onChange(Math.max(min, value - 1))} disabled={value <= min} aria-label={`Fewer ${label.toLowerCase()}`}>-</button>
         <output>{value}</output>
         <button type="button" className="icon-button" onClick={() => onChange(Math.min(max, value + 1))} disabled={value >= max} aria-label={`More ${label.toLowerCase()}`}>+</button>
       </div>

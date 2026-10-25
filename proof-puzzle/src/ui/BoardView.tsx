@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion'
 import type { Block, Board } from '../engine/types'
 import { blockColors, blockSize } from './colors'
+import { CloseIcon } from './Icons'
 
 type BoardViewProps = {
   board: Board
@@ -78,14 +79,14 @@ export function BoardView({
             {want && !compact && (
               <span
                 className="block-want"
-                title={`needs ${want.color}, facing ${want.rot * 90}°`}
+                title={`should be ${want.color}`}
                 style={{ background: blockColors[want.color] }}
                 aria-hidden="true"
               >
                 <span style={{ transform: `rotate(${want.rot * 90}deg)` }}><Arrow /></span>
               </span>
             )}
-            {isError && <span className="block-error-mark" aria-hidden="true">✕</span>}
+            {isError && <span className="block-error-mark" aria-hidden="true"><CloseIcon size={28} /></span>}
           </>
         )
 
@@ -96,7 +97,7 @@ export function BoardView({
             layout={animated ? 'position' : false}
             transition={{ layout: { duration: 0.42, ease: [0.4, 0, 0.2, 1] } }}
             role="gridcell"
-            aria-label={`Cell ${index}, ${block.color}, facing ${block.rot * 90} degrees${block.locked ? ', locked' : ''}${block.pinned ? ', pinned' : ''}${block.canRotate ? '' : ', cannot rotate'}${isError ? ', illegal move' : ''}`}
+            aria-label={`Block ${index}, ${block.color}, facing ${block.rot * 90} degrees${block.locked ? ', locked' : ''}${block.pinned ? ', pinned' : ''}${block.canRotate ? '' : ', cannot rotate'}${isError ? ', illegal move' : ''}`}
           >
             <motion.div
               className={classes}
@@ -113,7 +114,7 @@ export function BoardView({
                   type="button"
                   className="block-button"
                   onClick={() => onCellClick(index)}
-                  aria-label={`Block ${index}: ${block.color}. Click to add a move.`}
+                  aria-label={`Block ${index}: ${block.color}. Click to make a move.`}
                 >
                   {content}
                 </button>

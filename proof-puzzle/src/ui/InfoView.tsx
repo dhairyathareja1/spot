@@ -25,15 +25,15 @@ export function InfoView({ board, target, differing, trace, cursor, messages, st
     <section className={`infoview${stale ? ' is-stale' : ''}`} aria-label="Lean infoview">
       <details open className="info-section">
         <summary>
-          <span>Tactic state</span>
-          <span className="info-meta">{trace ? `after move ${cursor} of ${lastCursor}` : 'before any move'}</span>
+          <span>Goal</span>
+          <span className="info-meta">{trace ? `after move ${cursor} of ${lastCursor}` : 'before any moves'}</span>
         </summary>
         <div className="goal-state">
           {solved ? (
-            <p className="goal-accomplished"><span aria-hidden="true">🎉</span> No goals. Goals accomplished!</p>
+            <p className="goal-accomplished">No goals left. Solved!</p>
           ) : (
             <>
-              <p className="goal-count">1 goal</p>
+              <p className="goal-count">1 goal: make the board match the target</p>
               {differing.slice(0, 6).map((index) => (
                 <p className="goal-hyp" key={index}>
                   <span className="hyp-name">c{subscript(index)}</span>
@@ -43,7 +43,7 @@ export function InfoView({ board, target, differing, trace, cursor, messages, st
                   <Swatch board={target} index={index} />
                 </p>
               ))}
-              {differing.length > 6 && <p className="goal-more">… and {differing.length - 6} more</p>}
+              {differing.length > 6 && <p className="goal-more">and {differing.length - 6} more</p>}
               <p className="goal-turnstile"><span aria-hidden="true">⊢</span> board = target</p>
             </>
           )}
@@ -56,7 +56,7 @@ export function InfoView({ board, target, differing, trace, cursor, messages, st
           <span className={`info-badge${messages.some((message) => message.severity === 'error') ? ' is-error' : ''}`}>{messages.length}</span>
         </summary>
         {messages.length === 0 ? (
-          <p className="info-empty">No messages.</p>
+          <p className="info-empty">No problems found.</p>
         ) : (
           <ul className="message-list">
             {messages.map((message, index) => (
@@ -72,7 +72,7 @@ export function InfoView({ board, target, differing, trace, cursor, messages, st
       {trace && trace.steps.length > 0 && (
         <details className="info-section">
           <summary>
-            <span>Expanded moves</span>
+            <span>All moves</span>
             <span className="info-badge">{trace.steps.length}</span>
           </summary>
           <ol className="step-list">
@@ -105,7 +105,7 @@ function StepRow({ step, index, isCurrent, isFailing, onSelect }: {
       <button type="button" onClick={onSelect}>
         <span className="step-number">{index + 1}</span>
         <code>{formatMove(step.move)}</code>
-        {step.callStack.length > 0 && <span className="step-via">via {step.callStack.join(' › ')}</span>}
+        {step.callStack.length > 0 && <span className="step-via">from {step.callStack.join(', ')}</span>}
         <span className="step-line">line {step.line + 1}</span>
       </button>
     </li>

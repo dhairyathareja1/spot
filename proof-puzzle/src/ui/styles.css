@@ -195,6 +195,21 @@ button, input, select {
   cursor: not-allowed;
 }
 
+.icon-button.is-on {
+  background: var(--ink);
+  color: var(--paper);
+}
+
+.icon-button.is-on:hover:not(:disabled) {
+  background: var(--ink-soft);
+}
+
+.button svg,
+.chip svg,
+.icon-button svg {
+  flex-shrink: 0;
+}
+
 .icon-button.is-primary {
   background: var(--ink);
   color: var(--paper);
@@ -297,6 +312,7 @@ button, input, select {
 
 .stars-inline {
   display: inline-flex;
+  align-items: center;
   gap: 1px;
   color: rgba(13, 14, 18, 0.16);
 }
@@ -310,7 +326,7 @@ button, input, select {
 .app-shell {
   width: min(1320px, 100%);
   margin: 0 auto;
-  padding: 20px 32px 40px;
+  padding: 20px 32px 56px;
 }
 
 .top-bar {
@@ -385,21 +401,6 @@ button, input, select {
   color: var(--paper);
 }
 
-.site-footer {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
-  gap: 12px;
-  margin-top: 48px;
-  padding: 0 8px;
-  color: #50607a;
-  font-size: 13px;
-}
-
-.site-footer p {
-  margin: 0;
-}
-
 .not-found {
   display: grid;
   justify-items: start;
@@ -413,8 +414,7 @@ button, input, select {
 .hero,
 .chapter,
 .play-screen,
-.workshop,
-.lean-callout {
+.workshop {
   border-radius: var(--radius-xl);
   background: linear-gradient(180deg, var(--tint-top) 0%, var(--tint-bottom) 62%);
   box-shadow: var(--shadow);
@@ -707,7 +707,7 @@ button, input, select {
 }
 
 .level-card-boards.is-wide .board-grid {
-  --block-base: 17px;
+  --block-base: 15px !important;
 }
 
 .level-card-title {
@@ -781,64 +781,6 @@ a.extra-card:hover {
   display: flex;
   gap: 8px;
   margin-top: 12px;
-}
-
-.lean-callout {
-  --tint-top: #6ea4f6;
-  --tint-bottom: #f3f7ff;
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-  align-items: center;
-  gap: 40px;
-  padding: 48px;
-}
-
-.lean-callout h2 {
-  margin-bottom: 16px;
-  font-family: var(--font-display);
-  font-size: clamp(40px, 5vw, 64px);
-  font-weight: 400;
-  line-height: 0.92;
-  letter-spacing: 0;
-  text-transform: uppercase;
-}
-
-.lean-callout p {
-  margin-bottom: 0;
-  color: var(--ink-soft);
-  font-size: 16px;
-  line-height: 1.7;
-}
-
-.lean-snippet {
-  margin: 0;
-  padding: 24px;
-  overflow-x: auto;
-  border-radius: var(--radius-lg);
-  background: var(--paper);
-  box-shadow: var(--shadow-card);
-  font-size: 13.5px;
-  line-height: 1.7;
-}
-
-.settings {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 18px 28px;
-  padding: 24px 32px;
-  border-radius: var(--radius-xl);
-  background: var(--paper);
-  box-shadow: var(--shadow-card);
-}
-
-.settings h2 {
-  margin: 0 8px 0 0;
-  font-family: var(--font-display);
-  font-size: 28px;
-  font-weight: 400;
-  letter-spacing: 0;
-  text-transform: uppercase;
 }
 
 /* ---------- Play ---------- */
@@ -1275,7 +1217,22 @@ a.extra-card:hover {
   font-size: 12px;
 }
 
-.transport .icon-button.is-primary {
+.transport .icon-button.is-on {
+  background: var(--ink);
+  color: var(--paper);
+}
+
+.icon-button.is-on:hover:not(:disabled) {
+  background: var(--ink-soft);
+}
+
+.button svg,
+.chip svg,
+.icon-button svg {
+  flex-shrink: 0;
+}
+
+.icon-button.is-primary {
   min-width: 46px;
   height: 46px;
   margin-top: -4px;
@@ -2036,13 +1993,17 @@ a.extra-card:hover {
 }
 
 .qed-star {
-  display: inline-block;
+  display: inline-grid;
   color: rgba(13, 14, 18, 0.12);
 }
 
 .qed-star.is-earned {
   color: var(--star);
   filter: drop-shadow(0 4px 0 #c98a00);
+}
+
+.qed-star svg {
+  display: block;
 }
 
 .qed-verdict {
@@ -2289,7 +2250,6 @@ a.extra-card:hover {
 
 @media (max-width: 1080px) {
   .hero,
-  .lean-callout,
   .play-layout,
   .workshop-layout {
     grid-template-columns: minmax(0, 1fr);
@@ -2338,13 +2298,11 @@ a.extra-card:hover {
   .hero,
   .chapter,
   .play-screen,
-  .workshop,
-  .lean-callout {
+  .workshop {
     border-radius: 32px;
   }
 
-  .hero,
-  .lean-callout {
+  .hero {
     padding: 32px 22px;
   }
 
@@ -2395,6 +2353,20 @@ a.extra-card:hover {
   .level-grid {
     grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
     gap: 12px;
+  }
+
+  .level-card {
+    padding: 14px;
+  }
+
+  .level-card-boards {
+    min-height: 92px;
+    padding: 10px;
+  }
+
+  .level-card-boards .board-sm {
+    --block-size: calc(var(--block-base) * 0.62);
+    gap: 2px;
   }
 
   .play-header {
@@ -2448,7 +2420,4 @@ a.extra-card:hover {
     font-size: 84px;
   }
 
-  .settings {
-    padding: 22px;
-  }
 }

@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { leanPlaygroundUrl } from '../engine/lean'
 import { Dialog } from './Dialog'
+import { CheckIcon, CloseIcon, ExternalIcon } from './Icons'
 
 type LeanDialogProps = {
   open: boolean
@@ -32,20 +33,19 @@ export function LeanDialog({ open, code, fileName, onClose }: LeanDialogProps) {
 
   return (
     <Dialog open={open} onClose={onClose} labelledBy="lean-title" className="lean-dialog">
-      <h2 id="lean-title">Your proof, in real Lean 4</h2>
+      <h2 id="lean-title">Your proof in real Lean 4</h2>
       <p className="dialog-lead">
-        Every tactic in this game is a real Lean 4 tactic. The file below includes a small library that
-        defines boards, moves and <code>Solve</code>, then your proof. Lean checks each move with <code>rfl</code>, so an
-        illegal move fails on the same line as it does here.
+        Every move in this game is a real Lean 4 command. This file has a small library that describes boards and
+        moves, followed by your proof. Lean checks every move, so a bad move fails on the same line as in the game.
       </p>
       <pre className="lean-code"><code>{proofPart}</code></pre>
-      <p className="dialog-note">The full file also contains the {code.split('\n').length - proofPart.split('\n').length}-line ProofPuzzle library above this.</p>
+      <p className="dialog-note">Above this part, the file also has the {code.split('\n').length - proofPart.split('\n').length} lines of the ProofPuzzle library.</p>
       <div className="dialog-actions">
-        <a className="button button-primary" href={leanPlaygroundUrl(code)} target="_blank" rel="noreferrer">Open in Lean 4 Web ↗</a>
+        <a className="button button-primary" href={leanPlaygroundUrl(code)} target="_blank" rel="noreferrer">Open in Lean 4 online <ExternalIcon size={16} /></a>
         <button type="button" className="button" onClick={download}>Download {fileName}</button>
-        <button type="button" className="button" onClick={copy}>{copied ? 'Copied ✓' : 'Copy'}</button>
+        <button type="button" className="button" onClick={copy}>{copied ? <><CheckIcon /> Copied</> : 'Copy'}</button>
       </div>
-      <button type="button" className="dialog-close" onClick={onClose} aria-label="Close">✕</button>
+      <button type="button" className="dialog-close" onClick={onClose} aria-label="Close"><CloseIcon /></button>
     </Dialog>
   )
 }

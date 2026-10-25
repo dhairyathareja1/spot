@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion'
 import type { StarRating } from '../engine/rating'
 import { Dialog } from './Dialog'
+import { ArrowRightIcon, CheckIcon, CloseIcon, StarIcon } from './Icons'
 
 type QedDialogProps = {
   open: boolean
@@ -23,14 +24,14 @@ type QedDialogProps = {
 export function QedDialog(props: QedDialogProps) {
   const { open, stars, moves, size, par, parSize, newBest, hasNext, nextLabel } = props
   const verdict = stars === 3
-    ? 'A perfect proof. Matched par.'
+    ? 'Perfect! You matched the best score.'
     : stars === 2
-      ? parSize !== undefined && size > parSize ? 'Correct. Can you make it shorter with a helper or a loop?' : 'Correct. A shorter proof exists.'
-      : 'Correct. There is a much shorter proof.'
+      ? parSize !== undefined && size > parSize ? 'Correct! Can you make it shorter with a helper or a loop?' : 'Correct! There is a shorter way.'
+      : 'Correct! There is a much shorter way.'
 
   return (
     <Dialog open={open} onClose={props.onClose} labelledBy="qed-title" className="qed-dialog">
-      <p className="qed-eyebrow">Proof accepted</p>
+      <p className="qed-eyebrow">Proof complete</p>
       <h2 id="qed-title" className="qed-title">Q.E.D.</h2>
       <div className="qed-stars" role="img" aria-label={`${stars} out of 3 stars`}>
         {[1, 2, 3].map((star) => (
@@ -41,7 +42,7 @@ export function QedDialog(props: QedDialogProps) {
             animate={{ scale: 1, rotate: 0 }}
             transition={{ delay: 0.15 + star * 0.14, type: 'spring', stiffness: 420, damping: 14 }}
           >
-            ★
+            <StarIcon size={56} />
           </motion.span>
         ))}
       </div>
@@ -49,22 +50,22 @@ export function QedDialog(props: QedDialogProps) {
       <dl className="qed-stats">
         <div>
           <dt>Moves</dt>
-          <dd className={moves <= par ? 'is-par' : ''}>{moves}<span> / par {par}</span></dd>
+          <dd className={moves <= par ? 'is-par' : ''}>{moves}<span> / best {par}</span></dd>
         </div>
         <div>
           <dt>Lines</dt>
-          <dd className={parSize === undefined || size <= parSize ? 'is-par' : ''}>{size}{parSize !== undefined && <span> / par {parSize}</span>}</dd>
+          <dd className={parSize === undefined || size <= parSize ? 'is-par' : ''}>{size}{parSize !== undefined && <span> / best {parSize}</span>}</dd>
         </div>
       </dl>
       <div className="qed-actions">
         {hasNext
-          ? <button type="button" className="button button-primary" data-autofocus onClick={props.onNext}>{nextLabel} →</button>
+          ? <button type="button" className="button button-primary" data-autofocus onClick={props.onNext}>{nextLabel} <ArrowRightIcon /></button>
           : <a className="button button-primary" data-autofocus href="#/">All levels</a>}
         <button type="button" className="button" onClick={props.onReplay}>Replay</button>
-        <button type="button" className="button" onClick={props.onLean}>View in Lean 4</button>
-        <button type="button" className="button" onClick={props.onShare}>{props.shareState === 'copied' ? 'Link copied ✓' : 'Share proof'}</button>
+        <button type="button" className="button" onClick={props.onLean}>See it in Lean 4</button>
+        <button type="button" className="button" onClick={props.onShare}>{props.shareState === 'copied' ? <><CheckIcon /> Link copied</> : 'Share proof'}</button>
       </div>
-      <button type="button" className="dialog-close" onClick={props.onClose} aria-label="Close">✕</button>
+      <button type="button" className="dialog-close" onClick={props.onClose} aria-label="Close"><CloseIcon /></button>
     </Dialog>
   )
 }

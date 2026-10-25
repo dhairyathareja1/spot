@@ -1,5 +1,6 @@
 import { COLORS, type Board, type Color } from '../engine/types'
 import { blockColors } from './colors'
+import { CloseIcon, TurnLeftIcon, TurnRightIcon } from './Icons'
 
 type MoveBuilderProps = {
   board: Board
@@ -11,7 +12,7 @@ type MoveBuilderProps = {
 /** Click-to-prove: pick a block on the board and add a move without typing. */
 export function MoveBuilder({ board, selected, onAdd, onClear }: MoveBuilderProps) {
   if (selected === undefined) {
-    return <p className="builder-hint">Tip: click a block to build a move, or click two blocks to swap them.</p>
+    return <p className="builder-hint">Tip: click a block to make a move, or click two blocks to swap them.</p>
   }
 
   const block = board.cells[selected]
@@ -33,10 +34,10 @@ export function MoveBuilder({ board, selected, onAdd, onClear }: MoveBuilderProp
           />
         ))}
       </span>
-      <button type="button" className="chip" onClick={() => onAdd(`rotate ${selected}`)} title={`rotate ${selected}`}>↻ rotate</button>
-      <button type="button" className="chip" onClick={() => onAdd(`rotate ${selected} ccw`)} title={`rotate ${selected} ccw`}>↺ ccw</button>
-      <span className="builder-or">or click another block to swap</span>
-      <button type="button" className="chip chip-ghost" onClick={onClear} aria-label="Cancel">✕</button>
+      <button type="button" className="chip" onClick={() => onAdd(`rotate ${selected}`)} title={`rotate ${selected}`}><TurnRightIcon size={15} /> turn right</button>
+      <button type="button" className="chip" onClick={() => onAdd(`rotate ${selected} ccw`)} title={`rotate ${selected} ccw`}><TurnLeftIcon size={15} /> turn left</button>
+      <span className="builder-or">or click another block to swap them</span>
+      <button type="button" className="chip chip-ghost" onClick={onClear} aria-label="Cancel"><CloseIcon size={15} /></button>
     </div>
   )
 }

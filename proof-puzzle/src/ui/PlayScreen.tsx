@@ -18,6 +18,7 @@ import { getBlockMotionState } from './blockMotionState'
 import { burstConfetti } from './confetti'
 import { describeDiagnostic, describeMoveError } from './messages'
 import { chapterTint } from './colors'
+import { BackIcon, ChevronLeftIcon, ChevronRightIcon, ExternalIcon, PlayIcon, Stars } from './Icons'
 import { appendTactic, cursorForCaret, lineNotes, normalizeProof } from './proofState'
 import type { Puzzle } from './puzzles'
 import { navigate, routeHref } from './router'
@@ -91,7 +92,7 @@ export function PlayScreen({ puzzle, progress, onProgress, sharedProof }: PlaySc
     for (const warning of warnings) list.push({ line: warning.line, text: warning.message, severity: 'warning' })
     if (result && !result.trace.failedAt && !result.trace.solved && !result.usesSorry) {
       const left = result.trace.distance[result.trace.distance.length - 1]
-      list.push({ line: lastLine(source), text: `unsolved goals: ${left} ${left === 1 ? 'cell differs' : 'cells differ'} from the target`, severity: 'info' })
+      list.push({ line: lastLine(source), text: `not solved yet: ${left} ${left === 1 ? 'block does' : 'blocks do'} not match the target`, severity: 'info' })
     }
     return list.sort((a, b) => a.line - b.line)
   }, [compiled, success, source])
@@ -217,7 +218,7 @@ export function PlayScreen({ puzzle, progress, onProgress, sharedProof }: PlaySc
     <div className={`play-screen tint-${puzzle.kind === 'level' ? chapterTint(level.chapter) : puzzle.kind === 'custom' ? 'lime' : 'yellow'}`}>
       <header className="play-header">
         <div className="play-title">
-          <a className="back-link" href="#/" aria-label="Back to all levels">←</a>
+          <a className="back-link" href="#/" aria-label="Back to all levels"><BackIcon size={22} /></a>
           <div>
             <p className="eyebrow">{puzzle.eyebrow}</p>
             <h1>{puzzle.title}</h1>
@@ -225,19 +226,17 @@ export function PlayScreen({ puzzle, progress, onProgress, sharedProof }: PlaySc
           </div>
         </div>
         <div className="play-meta">
-          <div className="par-card" title="Three stars: match par">
-            <span className="stars-inline" aria-label={`Best: ${bestStars} of 3 stars`}>
-              {[1, 2, 3].map((star) => <span key={star} className={star <= bestStars ? 'is-earned' : ''}>★</span>)}
-            </span>
+          <div className="par-card" title="Match the best score to get three stars">
+            <Stars count={bestStars} size={22} />
             <span className="par-text">
-              par {level.par} {level.par === 1 ? 'move' : 'moves'}
-              {level.parSize !== undefined && ` · ${level.parSize} lines`}
-              {level.maxLines !== undefined && ` · max ${level.maxLines} lines`}
+              best: {level.par} {level.par === 1 ? 'move' : 'moves'}
+              {level.parSize !== undefined && `, ${level.parSize} lines`}
+              {level.maxLines !== undefined && ` · limit ${level.maxLines} lines`}
             </span>
           </div>
           <nav className="level-nav" aria-label="Level navigation">
-            {puzzle.prev && <a className="icon-button" href={routeHref(puzzle.prev)} aria-label="Previous level">‹</a>}
-            {puzzle.next && <a className="icon-button" href={routeHref(puzzle.next)} aria-label={puzzle.kind === 'random' ? 'New puzzle' : 'Next level'}>›</a>}
+            {puzzle.prev && <a className="icon-button" href={routeHref(puzzle.prev)} aria-label="Previous level"><ChevronLeftIcon size={22} /></a>}
+            {puzzle.next && <a className="icon-button" href={routeHref(puzzle.next)} aria-label={puzzle.kind === 'random' ? 'New puzzle' : 'Next level'}><ChevronRightIcon size={22} /></a>}
           </nav>
         </div>
       </header>
@@ -248,7 +247,7 @@ export function PlayScreen({ puzzle, progress, onProgress, sharedProof }: PlaySc
             <div className="stage-header">
               <h2>Board</h2>
               <span className={`distance-pill${differing.length === 0 ? ' is-done' : ''}`}>
-                {differing.length === 0 ? 'matches target' : `${differing.length} ${differing.length === 1 ? 'cell differs' : 'cells differ'}`}
+                {differing.length === 0 ? 'matches the target' : `${differing.length} ${differing.length === 1 ? 'block' : 'blocks'} to fix`}
               </span>
             </div>
             <div className="board-frame">
@@ -256,11 +255,10 @@ export function PlayScreen({ puzzle, progress, onProgress, sharedProof }: PlaySc
                 board={board}
                 blockIds={motion.blockIds}
                 rotationDegrees={motion.rotationDegrees}
-                animated={!progress.settings.reducedMotion}
+                animated
                 errorIndices={errorIndices}
                 differingIndices={differing}
                 target={showGhost ? level.target : undefined}
-                showLabels={progress.settings.colorLabels}
                 selected={selected === undefined ? [] : [selected]}
                 onCellClick={clickCell}
               />
@@ -274,10 +272,10 @@ export function PlayScreen({ puzzle, progress, onProgress, sharedProof }: PlaySc
               <h2>Target</h2>
               <label className="toggle">
                 <input type="checkbox" checked={showGhost} onChange={(event) => setShowGhost(event.target.checked)} />
-                <span>hints on board</span>
+                <span>show what each block needs</span>
               </label>
             </div>
-            <BoardView board={level.target} size="md" showLabels={progress.settings.colorLabels} label="Target board" />
+            <BoardView board={level.target} size="md" label="Target board" />
           </div>
         </section>
 
@@ -294,15 +292,15 @@ export function PlayScreen({ puzzle, progress, onProgress, sharedProof }: PlaySc
               </span>
               <div className="toolbar-actions">
                 {!conceptOpen && puzzle.concept && (
-                  <button type="button" className="chip" onClick={() => setConceptOpen(true)}>Idea</button>
+                  <button type="button" className="chip" onClick={() => setConceptOpen(true)}>New idea</button>
                 )}
                 <button type="button" className="chip" onClick={() => setHintLevel((current) => Math.min(current + 1, 3))}>
                   {hintLevel === 0 ? 'Hint' : 'More help'}
                 </button>
-                <button type="button" className="chip" onClick={() => setLeanOpen(true)}>Lean 4 ↗</button>
+                <button type="button" className="chip" onClick={() => setLeanOpen(true)}>Lean 4 <ExternalIcon size={14} /></button>
                 <button type="button" className="chip chip-ghost" onClick={reset}>Reset</button>
                 <button type="button" className="button button-primary button-small" onClick={play} disabled={!trace || trace.steps.length === 0}>
-                  ▶ Run
+                  <PlayIcon size={14} /> Run
                 </button>
               </div>
             </div>
@@ -324,20 +322,20 @@ export function PlayScreen({ puzzle, progress, onProgress, sharedProof }: PlaySc
             </Suspense>
             {hintLevel > 0 && (
               <div className="hint-box" role="note">
-                <p><strong>Hint.</strong> {level.hint}</p>
+                <p><strong>Hint:</strong> {level.hint}</p>
                 {hintLevel >= 2 && (
                   suggestion ? (
                     <p>
-                      From where your proof ends, a good next move is <code>{formatMove(suggestion)}</code>.{' '}
+                      From where your proof stops, try <code>{formatMove(suggestion)}</code>.{' '}
                       <button type="button" className="link-button" onClick={() => addTactic(formatMove(suggestion))}>Add it</button>
                     </p>
                   ) : (
-                    <p>{trace?.failedAt ? 'Fix the illegal move first.' : 'Your proof already reaches the target.'}</p>
+                    <p>{trace?.failedAt ? 'Fix the illegal move first.' : 'Your proof already matches the target.'}</p>
                   )
                 )}
                 {hintLevel >= 3 && (
                   <details className="solution-reveal">
-                    <summary>Reveal a reference proof</summary>
+                    <summary>Show an answer</summary>
                     <pre><code>{level.solution}</code></pre>
                   </details>
                 )}
