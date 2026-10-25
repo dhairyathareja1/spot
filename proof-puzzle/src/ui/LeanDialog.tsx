@@ -33,10 +33,10 @@ export function LeanDialog({ open, code, fileName, onClose }: LeanDialogProps) {
 
   return (
     <Dialog open={open} onClose={onClose} labelledBy="lean-title" className="lean-dialog">
-      <h2 id="lean-title">Your proof in real Lean 4</h2>
+      <h2 id="lean-title">Your proof in Lean 4</h2>
       <p className="dialog-lead">
-        Every move in this game is a real Lean 4 command. This file has a small library that describes boards and
-        moves, followed by your proof. Lean checks every move, so a bad move fails on the same line as in the game.
+        This file has a small Lean library that describes boards and moves, followed by your proof. In that library,
+        each move is a Lean tactic, and Lean checks that every move is legal. Helpers become Lean macros.
       </p>
       <pre className="lean-code"><code>{proofPart}</code></pre>
       <p className="dialog-note">Above this part, the file also has the {code.split('\n').length - proofPart.split('\n').length} lines of the ProofPuzzle library.</p>

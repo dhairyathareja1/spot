@@ -31,7 +31,7 @@ export function HomeScreen({ progress }: HomeScreenProps) {
           <p className="hero-lead">
             You get a grid of colored blocks and a picture to copy. Each line you write is one move:{' '}
             <code>swap</code>, <code>paint</code> or <code>rotate</code>. Later you learn to name a group of moves
-            with <code>def</code> and repeat it with <code>for</code> loops. Every proof you write also works in real Lean 4.
+            with <code>def</code> and repeat it with <code>for</code> loops. You can also export any proof and check it in Lean 4.
           </p>
           <div className="hero-actions">
             <a className="button button-primary button-large" href={routeHref({ screen: 'level', id: nextLevel.id })}>

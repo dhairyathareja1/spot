@@ -1,6 +1,6 @@
 # Proof Puzzle
 
-Solve block puzzles by writing Lean 4 proofs. Every line is a move, and every proof also checks in real Lean 4.
+A puzzle game where you match a picture by writing short proofs. Each line is one move. Proofs can be exported to Lean 4.
 
 The app lives in [`proof-puzzle/`](proof-puzzle). See its [README](proof-puzzle/README.md) for features, the proof language and how to run it.
 
